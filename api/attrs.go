@@ -146,13 +146,13 @@ func init() {
 	attrsCtrl := NewAttrsController()
 
 	// Prompt 相关路由
-	router.GET("/apps:app_id/attrs", attrsCtrl.GetAttrs)
+	router.GET("/apps/:app_id/attrs", attrsCtrl.GetAttrs)
 	router.GET("/apps/:app_id/attrs/:attr", attrsCtrl.GetAttr)
 
 	// 根据类型创建
-	router.POST("/apps/:app_id/:type/attrs/", attrsCtrl.CreateAttr)
-	router.PUT("/apps/:app_id/:type/attrs/:id", attrsCtrl.UpdateAttr)
+	// router.POST("/apps/:app_id/:type/attrs/", attrsCtrl.CreateAttr)
+	// router.PUT("/apps/:app_id/:type/attrs/:id", attrsCtrl.UpdateAttr)
 
-	router.DELETE("/apps/:id/attrs/:id", attrsCtrl.DeleteAttr)
+	// router.DELETE("/apps/:app_id/attrs/:id", attrsCtrl.DeleteAttr)
 
 }

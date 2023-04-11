@@ -33,7 +33,6 @@ func main() {
 	defer watcher.Close()
 
 	infra.Engine.Run(":8080")
-
 }
 
 func configWatch() *fsnotify.Watcher {
@@ -42,7 +41,7 @@ func configWatch() *fsnotify.Watcher {
 		panic(err)
 	}
 
-	err = watcher.Add("config.toml")
+	err = watcher.Add(config.ConfigPath)
 	if err != nil {
 		panic(err)
 	}

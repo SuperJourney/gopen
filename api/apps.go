@@ -151,9 +151,9 @@ func init() {
 
 	// App 相关路由
 	router.GET("/apps", appCtrl.GetApps)
-	router.GET("/apps/:id", appCtrl.GetApp)
+	router.GET("/apps/:app_id", appCtrl.GetApp)
 	router.POST("/apps", appCtrl.CreateApp)
-	router.PUT("/apps/:id", appCtrl.UpdateApp)
-	router.DELETE("/apps/:id", appCtrl.DeleteApp)
+	router.PUT("/apps/:app_id", appCtrl.UpdateApp)
+	router.DELETE("/apps/:app_id", appCtrl.DeleteApp)
 
 }

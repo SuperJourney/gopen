@@ -1,19 +1,21 @@
 version: '3.9'
 services:
-  devcontainer:
+  goopen:
     build: 
       context: .
       ssh:
         - default
-      environment: 
-        - GOPROXY=https://goproxy.cn
+      args:
+        - GOPROXY=${GOPROXY}
+    environment:
+      - GO111MODULE=on
+      - GOPROXY=${GOPROXY}
     volumes:
-      - ../:/workspaces:cached
+      - .:/workspaces/gopen:cached
     privileged: true
-    network_mode: host
-    command: sleep infinity
+    # command: sleep infinity
     ports:
-      - "8080:80"
+      - "7211:8080"
     
   # db:
   #   image: postgres:latest

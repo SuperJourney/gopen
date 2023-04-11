@@ -106,7 +106,7 @@ var mock = &cobra.Command{
 }
 
 func init() {
-	initDB.PersistentFlags().StringVar(&dbFile, "dbfile", "/tmp/db", "Path to SQLite3 database file")
+	initDB.PersistentFlags().StringVar(&dbFile, "dbfile", "/workspaces/gopen/db", "Path to SQLite3 database file")
 	MigrationCmd.AddCommand(initDB)
 	MigrationCmd.AddCommand(genModel)
 	MigrationCmd.AddCommand(mock)

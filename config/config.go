@@ -4,6 +4,8 @@ import (
 	"github.com/pelletier/go-toml"
 )
 
+var ConfigPath = "/workspaces/gopen/config.toml"
+
 type Setting struct {
 	ChatGPT
 	AppSetting
@@ -23,7 +25,7 @@ type ChatGPT struct {
 }
 
 func LoadConfig() *Setting {
-	tree, err := toml.LoadFile("config.toml")
+	tree, err := toml.LoadFile(ConfigPath)
 	if err != nil {
 		panic(err)
 	}

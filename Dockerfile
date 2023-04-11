@@ -1,18 +1,16 @@
-FROM golang:1-bullseye
-
+FROM golang:1-bullseye as build
 WORKDIR /www
 
-# RUN --mount=type=ssh  mkdir ~/.ssh &&  ssh-keyscan github.com >> ~/.ssh/known_hosts && git clone git@github.com:SuperJourney/CircleCI-Test.git
-EXPOSE 8080
-
+ARG GOPROXY
+ENV GOPROXY=${GOPROXY} 
 
 COPY go.mod /www
 RUN  go mod download
 
-COPY .  /www
-
-RUN  GOOS=linux GOARCH=amd64 go build -o app
-
-RUN  GOOS=linux GOARCH=amd64 go install 
-
-ENTRYPOINT ["gopen"]
+COPY . /www
+ENV CGO_ENABLED=0
+RUN  go build -o server
+FROM alpine:3.12
+EXPOSE 8080
+COPY --from=build /www/server /bin
+CMD ["/bin/server"]
