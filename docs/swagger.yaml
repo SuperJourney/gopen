@@ -34,7 +34,7 @@ definitions:
       succ:
         type: string
     type: object
-host: localhost:8080
+host: 10.11.28.73:7211
 info:
   contact: {}
   description: This is a API documentation for OPENAI.

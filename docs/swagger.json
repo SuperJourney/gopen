@@ -6,7 +6,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:8080",
+    "host": "10.11.28.73:7211",
     "basePath": "/api",
     "paths": {
         "/v1/apps": {

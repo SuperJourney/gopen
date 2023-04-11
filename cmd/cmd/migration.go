@@ -31,17 +31,17 @@ var initDB = &cobra.Command{
 				return
 			}
 			f.Close()
+
+			db, err := gorm.Open(sqlite.Open(dbFile), &gorm.Config{})
+			if err != nil {
+				panic("failed to connect database:%v")
+			}
+
+			// Create the users table
+			db.AutoMigrate(bootstrap.GetTables()...)
+
+			fmt.Println("Database initialized successfully")
 		}
-
-		db, err := gorm.Open(sqlite.Open(dbFile), &gorm.Config{})
-		if err != nil {
-			panic("failed to connect database:%v")
-		}
-
-		// Create the users table
-		db.AutoMigrate(bootstrap.GetTables()...)
-
-		fmt.Println("Database initialized successfully")
 	},
 }
 
