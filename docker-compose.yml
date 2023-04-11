@@ -1,0 +1,27 @@
+version: '3.9'
+services:
+  devcontainer:
+    build: 
+      context: .
+      ssh:
+        - default
+    volumes:
+      - ../:/workspaces:cached
+    privileged: true
+    network_mode: host
+    command: sleep infinity
+    ports:
+      - "8081:80"
+    
+  # db:
+  #   image: postgres:latest
+  #   restart: unless-stopped
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   environment:
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_DB: postgres
+
+# volumes:
+#   postgres-data:

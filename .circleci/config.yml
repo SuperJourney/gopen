@@ -1,0 +1,41 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: golang:1.16.5
+    working_directory: /go/src/github.com/SuperJourney/goopen
+    steps:
+      - checkout
+      - run: go build
+      - run: go test -v
+  deploy:
+    docker:
+      - image: golang:1.16.5
+    working_directory: /go/src/github.com/SuperJourney/gopen
+    steps:
+      - checkout
+      - run:
+          name: Build binary
+          command: GOOS=linux GOARCH=amd64 go build -o app
+      - run:
+          name: Deploy to production
+          command: |
+            ssh -o StrictHostKeyChecking=no  root@182.254.176.160 "cd /root/superjourney/gopen && git pull &&  docker compose  up --build -d "
+    environment:
+
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: main
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: main
+          context: tyun
+

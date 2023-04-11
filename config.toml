@@ -1,0 +1,8 @@
+[AppSetting]
+ConfigFile="123"
+DBFile="/tmp/db"
+[ChatGPT]
+ApiToken = ""
+MaxTokens = 10
+Model = "gpt-3.5-turbo"
+Temperature=0.4

@@ -1,0 +1,232 @@
+basePath: /api
+definitions:
+  api.Prompt:
+    properties:
+      id:
+        type: string
+      text:
+        type: string
+    type: object
+  common.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  model.App:
+    properties:
+      attrs:
+        items:
+          $ref: '#/definitions/model.Attr'
+        type: array
+      created_at:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: integer
+    type: object
+  model.Attr:
+    properties:
+      app_id:
+        type: integer
+      context:
+        description: 内容
+        type: string
+      created_at:
+        type: integer
+      id:
+        type: integer
+      name:
+        description: Tab
+        type: string
+      type:
+        description: 1 chat completion 2 img
+        type: integer
+      updated_at:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a API documentation for OPENAI.
+  title: OPENAI
+  version: "1.0"
+paths:
+  /v1/apps:
+    get:
+      description: Get all apps
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.App'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Get all apps
+      tags:
+      - v1
+    post:
+      consumes:
+      - application/json
+      description: Creates a new app with the provided data
+      parameters:
+      - description: App data
+        in: body
+        name: app
+        required: true
+        schema:
+          $ref: '#/definitions/model.App'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.App'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Create a new app
+      tags:
+      - v1
+  /v1/apps/{id}:
+    get:
+      description: Get app by ID
+      parameters:
+      - description: App ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.App'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Get app by ID
+      tags:
+      - v1
+  /v1/gpt/chat-completion:
+    get:
+      consumes:
+      - application/json
+      description: 基于OpenAI的Chat Completion API，生成对话文本。
+      parameters:
+      - description: 对话角色
+        in: query
+        name: role
+        required: true
+        type: string
+      - description: 对话内容
+        in: query
+        name: content
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功生成对话文本
+          schema:
+            type: string
+        "500":
+          description: 生成对话文本失败
+          schema: {}
+      summary: 使用OpenAI生成对话文本
+      tags:
+      - v1
+  /v1/gpt/text-completion:
+    get:
+      consumes:
+      - application/json
+      description: Generate text completion based on prompt
+      parameters:
+      - description: Prompt for text completion
+        in: query
+        name: prompt
+        required: true
+        type: string
+      - description: Maximum number of tokens to generate
+        in: query
+        name: max_tokens
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Generated text
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Generate Text Completion
+      tags:
+      - v1
+  /v1/prompt/{id}:
+    get:
+      description: Retrieves a prompt by ID
+      parameters:
+      - description: Prompt ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/api.Prompt'
+      summary: Retrieve a prompt by ID
+      tags:
+      - v1
+  /v2/prompt/{id}:
+    get:
+      description: Retrieves a prompt by ID
+      parameters:
+      - description: Prompt ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/api.Prompt'
+      summary: Retrieve a prompt by ID
+      tags:
+      - v2
+swagger: "2.0"
