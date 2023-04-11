@@ -1,10 +1,6 @@
 version: '3.9'
 services:
   devcontainer:
-    environment: 
-      - GOPROXY=https://goproxy.cn
-      - TEST=123
-    build: 
       context: .
       ssh:
         - default

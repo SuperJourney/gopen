@@ -11,7 +11,7 @@ services:
     network_mode: host
     command: sleep infinity
     ports:
-      - "8081:80"
+      - "8080:80"
     
   # db:
   #   image: postgres:latest
