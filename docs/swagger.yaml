@@ -5,6 +5,18 @@ definitions:
       name:
         type: string
     type: object
+  api.Attr:
+    properties:
+      context:
+        description: 内容
+        type: string
+      name:
+        description: Tab
+        type: string
+      type:
+        description: 1 chat completion 2 img
+        type: integer
+    type: object
   api.Prompt:
     properties:
       id:
@@ -47,7 +59,7 @@ paths:
             $ref: '#/definitions/common.ErrorResponse'
       summary: Get all apps
       tags:
-      - v1
+      - App
     post:
       consumes:
       - application/json
@@ -76,7 +88,7 @@ paths:
             $ref: '#/definitions/common.ErrorResponse'
       summary: Create a new app
       tags:
-      - v1
+      - App
   /v1/apps/{app_id}:
     delete:
       consumes:
@@ -106,6 +118,186 @@ paths:
       summary: Delete an app
       tags:
       - App
+  /v1/apps/{app_id}/attrs:
+    get:
+      description: Get all attrs
+      parameters:
+      - description: App ID
+        in: path
+        name: app_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/api.Attr'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Get all Attrs
+      tags:
+      - Attr
+    post:
+      consumes:
+      - application/json
+      description: Creates a new Attr with the provided data
+      parameters:
+      - description: App ID
+        in: path
+        name: app_id
+        required: true
+        type: integer
+      - description: Attr data
+        in: body
+        name: app
+        required: true
+        schema:
+          $ref: '#/definitions/api.Attr'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.Attr'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Create a new Attr
+      tags:
+      - Attr
+  /v1/apps/{app_id}/attrs/{attr_id}:
+    get:
+      description: Get Attr by ID
+      parameters:
+      - description: App ID
+        in: path
+        name: app_id
+        required: true
+        type: integer
+      - description: Attr ID
+        in: path
+        name: attr_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.Attr'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Get Attr by ID
+      tags:
+      - Attr
+  /v1/apps/{appID}/attrs/{attrID}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an attribute by providing the app ID, attribute ID, and
+        updated attribute information
+      parameters:
+      - description: App ID
+        format: int32
+        in: path
+        name: appID
+        required: true
+        type: integer
+      - description: Attribute ID
+        format: int32
+        in: path
+        name: attrID
+        required: true
+        type: integer
+      - description: Updated attribute information
+        in: body
+        name: updatedAttr
+        required: true
+        schema:
+          $ref: '#/definitions/api.Attr'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/common.SuccResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Delete an attribute
+      tags:
+      - Attr
+    put:
+      consumes:
+      - application/json
+      description: Update an attribute by providing the app ID, attribute ID, and
+        updated attribute information
+      parameters:
+      - description: App ID
+        format: int32
+        in: path
+        name: appID
+        required: true
+        type: integer
+      - description: Attribute ID
+        format: int32
+        in: path
+        name: attrID
+        required: true
+        type: integer
+      - description: Updated attribute information
+        in: body
+        name: updatedAttr
+        required: true
+        schema:
+          $ref: '#/definitions/api.Attr'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/common.SuccResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Update an attribute
+      tags:
+      - Attr
   /v1/apps/{id}:
     get:
       description: Get app by ID
@@ -136,7 +328,7 @@ paths:
             $ref: '#/definitions/common.ErrorResponse'
       summary: Get app by ID
       tags:
-      - v1
+      - App
     put:
       consumes:
       - application/json

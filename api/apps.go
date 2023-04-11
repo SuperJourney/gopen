@@ -17,6 +17,18 @@ type App struct {
 	Name string `json:"name,omitempty"`
 }
 
+// type Attr struct {
+// 	ID      uint   `gorm:"primarykey"`
+// 	Type    int32  `json:"type,omitempty"`    // 1 chat completion 2 img
+// 	Name    string `json:"name,omitempty"`    // Tab
+// 	Context string `json:"context,omitempty"` // 内容
+// }
+
+// type App_S struct {
+// 	App
+// 	Attrs []Attr
+// }
+
 type AppController struct {
 	// 这里可以注入一些服务或数据库连接
 	Query *query.Query
@@ -30,7 +42,7 @@ func NewAppController() *AppController {
 
 // @Summary Get all apps
 // @Description Get all apps
-// @Tags v1
+// @Tags App
 // @Produce json
 // @Success 200 {array} App
 // @Failure 500 {object} common.ErrorResponse
@@ -48,7 +60,7 @@ func (ctrl *AppController) GetApps(c *gin.Context) {
 
 // @Summary Get app by ID
 // @Description Get app by ID
-// @Tags v1
+// @Tags App
 // @Produce json
 // @Param id path int true "App ID"
 // @Success 200 {object} App
@@ -92,6 +104,21 @@ func (ctrl *AppController) GetApp(c *gin.Context) {
 		return
 	}
 
+	// // Query the app by ID
+	// attrDB := ctrl.Query.Attr
+	// attrs, err := attrDB.Where(attrDB.AppID.Eq(int32(id))).Find()
+	// if err != nil {
+	// 	if !errors.Is(err, gorm.ErrRecordNotFound) {
+	// 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+	// 			"error": err.Error(),
+	// 		})
+	// 	}
+	// 	return
+	// }
+	// for _, v := range attrs {
+	// 	app.Attrs = append(app.Attrs, *v)
+	// }
+
 	c.JSON(http.StatusOK, gin.H{
 		"app": app,
 	})
@@ -99,7 +126,7 @@ func (ctrl *AppController) GetApp(c *gin.Context) {
 
 // @Summary Create a new app
 // @Description Creates a new app with the provided data
-// @Tags v1
+// @Tags App
 // @Accept json
 // @Produce json
 // @Param app body App true "App data"
@@ -141,7 +168,6 @@ func (ctrl *AppController) CreateApp(c *gin.Context) {
 // @Tags App
 // @Accept json
 // @Produce json
-// @Tag v1
 // @Param app_id path string true "应用ID"
 // @Param appData body App true "更新的应用数据"
 // @Success 200 {object} App
@@ -198,7 +224,6 @@ func (ctrl *AppController) UpdateApp(c *gin.Context) {
 // @Tags App
 // @Accept json
 // @Produce json
-// @Tag v1
 // @Param app_id path int true "App ID"
 // @Success 200 {object} common.SuccResponse "Successfully deleted app"
 // @Failure 400 {object} common.ErrorResponse "Invalid app ID"
