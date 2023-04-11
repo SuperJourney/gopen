@@ -17,6 +17,7 @@ import (
 // @version 1.0
 // @description This is a API documentation for OPENAI.
 // @host 192.168.3.246:7211
+// @host localhost:8080
 // @BasePath /api
 func main() {
 	infra.Engine.Use(func(c *gin.Context) {

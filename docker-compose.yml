@@ -15,8 +15,8 @@ services:
       - data:/data
     privileged: true
     # command: sleep infinity
-    ports:
-      - "8080:8080"
+    # ports:
+    #   - "8080:8080"
     networks:
       - app_net
 
