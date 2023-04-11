@@ -5,6 +5,8 @@ services:
       context: .
       ssh:
         - default
+      environment: 
+        - GOPROXY=https://goproxy.cn
     volumes:
       - ../:/workspaces:cached
     privileged: true
