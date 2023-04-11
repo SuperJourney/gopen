@@ -9,6 +9,11 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
+type ChatCompletionMessage struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
 var client = GetClient()
 
 func GetClient() *openai.Client {

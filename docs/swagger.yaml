@@ -10,12 +10,36 @@ definitions:
       context:
         description: 内容
         type: string
+      id:
+        type: integer
       name:
         description: Tab
         type: string
       type:
         description: 1 chat completion 2 img
         type: integer
+    type: object
+  api.ChatAttr:
+    properties:
+      context:
+        items:
+          $ref: '#/definitions/api.ChatCompletionMessage'
+        type: array
+      id:
+        type: integer
+      name:
+        description: Tab
+        type: string
+      type:
+        description: 1 chat completion 2 img
+        type: integer
+    type: object
+  api.ChatCompletionMessage:
+    properties:
+      content:
+        type: string
+      role:
+        type: string
     type: object
   api.Prompt:
     properties:
@@ -211,6 +235,78 @@ paths:
           schema:
             $ref: '#/definitions/common.ErrorResponse'
       summary: Get Attr by ID
+      tags:
+      - Attr
+  /v1/apps/{app_id}/chat_attrs:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new Attr with the provided data
+      parameters:
+      - description: App ID
+        in: path
+        name: app_id
+        required: true
+        type: integer
+      - description: 更新的应用数据
+        in: body
+        name: appData
+        required: true
+        schema:
+          $ref: '#/definitions/api.ChatAttr'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.Attr'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Create a new Attr
+      tags:
+      - Attr
+  /v1/apps/{app_id}/imag_attrs:
+    post:
+      consumes:
+      - application/json
+      description: 创建一个文本类应用属性
+      parameters:
+      - description: App ID
+        in: path
+        name: app_id
+        required: true
+        type: integer
+      - description: 更新的应用数据
+        in: body
+        name: appData
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/api.ChatCompletionMessage'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.Attr'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: 创建一个文本类应用属性
       tags:
       - Attr
   /v1/apps/{appID}/attrs/{attrID}:

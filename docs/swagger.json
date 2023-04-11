@@ -391,6 +391,115 @@
                 }
             }
         },
+        "/v1/apps/{app_id}/chat_attrs": {
+            "post": {
+                "description": "Creates a new Attr with the provided data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Attr"
+                ],
+                "summary": "Create a new Attr",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "App ID",
+                        "name": "app_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新的应用数据",
+                        "name": "appData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.ChatAttr"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.Attr"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/apps/{app_id}/imag_attrs": {
+            "post": {
+                "description": "创建一个文本类应用属性",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Attr"
+                ],
+                "summary": "创建一个文本类应用属性",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "App ID",
+                        "name": "app_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新的应用数据",
+                        "name": "appData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/api.ChatCompletionMessage"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.Attr"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/apps/{id}": {
             "get": {
                 "description": "Get app by ID",
@@ -651,6 +760,9 @@
                     "description": "内容",
                     "type": "string"
                 },
+                "id": {
+                    "type": "integer"
+                },
                 "name": {
                     "description": "Tab",
                     "type": "string"
@@ -658,6 +770,39 @@
                 "type": {
                     "description": "1 chat completion 2 img",
                     "type": "integer"
+                }
+            }
+        },
+        "api.ChatAttr": {
+            "type": "object",
+            "properties": {
+                "context": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.ChatCompletionMessage"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "Tab",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "1 chat completion 2 img",
+                    "type": "integer"
+                }
+            }
+        },
+        "api.ChatCompletionMessage": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
                 }
             }
         },
