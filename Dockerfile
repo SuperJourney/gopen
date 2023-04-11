@@ -10,7 +10,7 @@ RUN  go mod download
 
 COPY . /www
 ENV CGO_ENABLED=0
-RUN  go run cmd/main.go  migration init
+RUN  go run cmd/main.go  migration init --dbfile /data/db
 RUN  go build -o server
 FROM alpine:3.12
 EXPOSE 8080

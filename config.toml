@@ -1,6 +1,6 @@
 [AppSetting]
 ConfigFile=""
-DBFile="/tmp/db"
+DBFile="/data/db"
 [ChatGPT]
 ApiToken = ""
 MaxTokens = 10

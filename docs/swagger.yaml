@@ -34,7 +34,7 @@ definitions:
       succ:
         type: string
     type: object
-host: 10.11.28.73:7211
+host: 192.168.3.246:7211
 info:
   contact: {}
   description: This is a API documentation for OPENAI.
