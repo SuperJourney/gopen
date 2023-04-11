@@ -19,6 +19,12 @@ import (
 // @host localhost:8080
 // @BasePath /api
 func main() {
+	infra.Engine.Use(func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")                                // 允许任意域名访问
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS") // 允许的 HTTP 方法
+		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")     // 允许的请求头
+		c.Next()
+	})
 	// infra.Engine.GET("/hello", HelloWorld)
 	infra.Engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
