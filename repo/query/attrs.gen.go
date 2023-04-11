@@ -32,8 +32,9 @@ func newAttr(db *gorm.DB, opts ...gen.DOOption) attr {
 	_attr.Context = field.NewString(tableName, "context")
 	_attr.AppID = field.NewInt32(tableName, "app_id")
 	_attr.ID = field.NewUint(tableName, "id")
-	_attr.CreatedAt = field.NewInt64(tableName, "created_at")
-	_attr.UpdatedAt = field.NewInt64(tableName, "updated_at")
+	_attr.CreatedAt = field.NewTime(tableName, "created_at")
+	_attr.UpdatedAt = field.NewTime(tableName, "updated_at")
+	_attr.DeletedAt = field.NewField(tableName, "deleted_at")
 
 	_attr.fillFieldMap()
 
@@ -49,8 +50,9 @@ type attr struct {
 	Context   field.String
 	AppID     field.Int32
 	ID        field.Uint
-	CreatedAt field.Int64
-	UpdatedAt field.Int64
+	CreatedAt field.Time
+	UpdatedAt field.Time
+	DeletedAt field.Field
 
 	fieldMap map[string]field.Expr
 }
@@ -72,8 +74,9 @@ func (a *attr) updateTableName(table string) *attr {
 	a.Context = field.NewString(table, "context")
 	a.AppID = field.NewInt32(table, "app_id")
 	a.ID = field.NewUint(table, "id")
-	a.CreatedAt = field.NewInt64(table, "created_at")
-	a.UpdatedAt = field.NewInt64(table, "updated_at")
+	a.CreatedAt = field.NewTime(table, "created_at")
+	a.UpdatedAt = field.NewTime(table, "updated_at")
+	a.DeletedAt = field.NewField(table, "deleted_at")
 
 	a.fillFieldMap()
 
@@ -90,7 +93,7 @@ func (a *attr) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *attr) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 7)
+	a.fieldMap = make(map[string]field.Expr, 8)
 	a.fieldMap["type"] = a.Type
 	a.fieldMap["name"] = a.Name
 	a.fieldMap["context"] = a.Context
@@ -98,6 +101,7 @@ func (a *attr) fillFieldMap() {
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
+	a.fieldMap["deleted_at"] = a.DeletedAt
 }
 
 func (a attr) clone(db *gorm.DB) attr {

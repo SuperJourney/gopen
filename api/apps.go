@@ -13,6 +13,10 @@ import (
 	"gorm.io/gorm"
 )
 
+type App struct {
+	Name string `json:"name,omitempty"`
+}
+
 type AppController struct {
 	// 这里可以注入一些服务或数据库连接
 	Query *query.Query
@@ -28,15 +32,13 @@ func NewAppController() *AppController {
 // @Description Get all apps
 // @Tags v1
 // @Produce json
-// @Success 200 {array} model.App
+// @Success 200 {array} App
 // @Failure 500 {object} common.ErrorResponse
 // @Router /v1/apps [get]
 func (ctrl *AppController) GetApps(c *gin.Context) {
 	apps, err := ctrl.Query.App.Find()
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		common.Error(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
@@ -49,13 +51,13 @@ func (ctrl *AppController) GetApps(c *gin.Context) {
 // @Tags v1
 // @Produce json
 // @Param id path int true "App ID"
-// @Success 200 {object} model.App
+// @Success 200 {object} App
 // @Failure 400 {object} common.ErrorResponse
 // @Failure 404 {object} common.ErrorResponse
 // @Failure 500 {object} common.ErrorResponse
 // @Router /v1/apps/{id} [get]
 func (ctrl *AppController) GetApp(c *gin.Context) {
-	appID := c.Param("id")
+	appID := c.Param("app_id")
 
 	// Validate the app ID parameter
 	if appID == "" {
@@ -75,8 +77,8 @@ func (ctrl *AppController) GetApp(c *gin.Context) {
 	}
 
 	// Query the app by ID
-	db := ctrl.Query.App
-	app, err := db.Where(db.ID.Eq(uint(id))).First()
+	appDB := ctrl.Query.App
+	app, err := appDB.Where(appDB.ID.Eq(uint(id))).First()
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
@@ -90,7 +92,6 @@ func (ctrl *AppController) GetApp(c *gin.Context) {
 		return
 	}
 
-	// Return the app as JSON
 	c.JSON(http.StatusOK, gin.H{
 		"app": app,
 	})
@@ -101,8 +102,8 @@ func (ctrl *AppController) GetApp(c *gin.Context) {
 // @Tags v1
 // @Accept json
 // @Produce json
-// @Param app body model.App true "App data"
-// @Success 200 {object} model.App
+// @Param app body App true "App data"
+// @Success 200 {object} App
 // @Failure 400 {object} common.ErrorResponse
 // @Failure 500 {object} common.ErrorResponse
 // @Router /v1/apps [post]
@@ -122,27 +123,112 @@ func (ctrl *AppController) CreateApp(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "App name is required"})
 		return
 	}
+
 	db := ctrl.Query.App
 	// Save app data to database
-	db.Create(&app)
-	if err != nil {
+	if err := db.Create(&app); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save app data"})
 		return
 	}
 
-	c.JSON(http.StatusOK, app)
+	c.JSON(http.StatusOK, gin.H{
+		"app": app,
+	})
 }
 
+// @Summary 更新应用
+// @Description 根据提供的应用ID和更新的应用数据更新应用信息
+// @Tags App
+// @Accept json
+// @Produce json
+// @Tag v1
+// @Param app_id path string true "应用ID"
+// @Param appData body App true "更新的应用数据"
+// @Success 200 {object} App
+// @Failure 400 {object} common.ErrorResponse
+// @Failure 400 {object} common.ErrorResponse
+// @Failure 500 {object} common.ErrorResponse
+// @Router /v1/apps/{id} [put]
 func (ctrl *AppController) UpdateApp(c *gin.Context) {
+	// Get the app ID from the URL parameter
+	appID := c.Param("app_id")
 
+	// Parse the request body to get the updated app data
+	var updatedApp *model.App // Replace "App" with the appropriate struct for your app
+	err := c.ShouldBindJSON(&updatedApp)
+	if err != nil {
+		// Handle error if parsing fails
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Convert the app ID to an integer
+	id, err := strconv.Atoi(appID)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "invalid app ID",
+		})
+		return
+	}
+
+	appDB := ctrl.Query.App
+	// Fetch the existing app from the database
+	existingApp, err := appDB.Where(appDB.ID.Eq(uint(id))).First()
+	if err != nil {
+		// Handle error if fetching app fails
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Update the existing app with the updated app data
+	existingApp.Name = updatedApp.Name
+	// Update other fields as needed
+
+	// Save the updated app to the database
+	appDB.Create(existingApp)
+
+	// Return success response
+	c.JSON(http.StatusOK, gin.H{
+		"app": existingApp,
+	})
 }
 
+// @Summary Delete an app
+// @Description Delete an app by app ID
+// @Tags App
+// @Accept json
+// @Produce json
+// @Tag v1
+// @Param app_id path int true "App ID"
+// @Success 200 {object} common.SuccResponse "Successfully deleted app"
+// @Failure 400 {object} common.ErrorResponse "Invalid app ID"
+// @Failure 500 {object} common.ErrorResponse "Internal server error"
+// @Router /v1/apps/{app_id} [delete]
 func (ctrl *AppController) DeleteApp(c *gin.Context) {
-	// 删除 App
-}
+	// Get the app ID from the URL parameter
+	appID := c.Param("app_id")
 
-func (ctrl *AppController) GetAttrs(ct *gin.Context) {
+	// Convert the app ID to an integer
+	id, err := strconv.Atoi(appID)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "invalid app ID",
+		})
+		return
+	}
 
+	appDB := ctrl.Query.App
+	// Fetch the existing app from the database
+	existingApp, err := appDB.Where(appDB.ID.Eq(uint(id))).First()
+	if err != nil {
+		// Handle error if fetching app fails
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	appDB.Delete(existingApp)
+	c.JSON(http.StatusOK, gin.H{
+		"succ": true,
+	})
 }
 
 func init() {

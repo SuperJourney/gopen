@@ -32,7 +32,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/model.App"
+                                "$ref": "#/definitions/api.App"
                             }
                         }
                     },
@@ -63,7 +63,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.App"
+                            "$ref": "#/definitions/api.App"
                         }
                     }
                 ],
@@ -71,7 +71,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.App"
+                            "$ref": "#/definitions/api.App"
                         }
                     },
                     "400": {
@@ -82,6 +82,50 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/apps/{app_id}": {
+            "delete": {
+                "description": "Delete an app by app ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "App"
+                ],
+                "summary": "Delete an app",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "App ID",
+                        "name": "app_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully deleted app",
+                        "schema": {
+                            "$ref": "#/definitions/common.SuccResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid app ID",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/common.ErrorResponse"
                         }
@@ -112,7 +156,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.App"
+                            "$ref": "#/definitions/api.App"
                         }
                     },
                     "400": {
@@ -123,6 +167,57 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "根据提供的应用ID和更新的应用数据更新应用信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "App"
+                ],
+                "summary": "更新应用",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "应用ID",
+                        "name": "app_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新的应用数据",
+                        "name": "appData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.App"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.App"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/common.ErrorResponse"
                         }
@@ -283,6 +378,14 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "api.App": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "api.Prompt": {
             "type": "object",
             "properties": {
@@ -302,55 +405,11 @@ const docTemplate = `{
                 }
             }
         },
-        "model.App": {
+        "common.SuccResponse": {
             "type": "object",
             "properties": {
-                "attrs": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.Attr"
-                    }
-                },
-                "created_at": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
+                "succ": {
                     "type": "string"
-                },
-                "updated_at": {
-                    "type": "integer"
-                }
-            }
-        },
-        "model.Attr": {
-            "type": "object",
-            "properties": {
-                "app_id": {
-                    "type": "integer"
-                },
-                "context": {
-                    "description": "内容",
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "description": "Tab",
-                    "type": "string"
-                },
-                "type": {
-                    "description": "1 chat completion 2 img",
-                    "type": "integer"
-                },
-                "updated_at": {
-                    "type": "integer"
                 }
             }
         }

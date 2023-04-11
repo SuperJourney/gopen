@@ -16,7 +16,7 @@ services:
     # command: sleep infinity
     ports:
       - "7211:8080"
-    
+  
   # db:
   #   image: postgres:latest
   #   restart: unless-stopped

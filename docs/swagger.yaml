@@ -1,5 +1,10 @@
 basePath: /api
 definitions:
+  api.App:
+    properties:
+      name:
+        type: string
+    type: object
   api.Prompt:
     properties:
       id:
@@ -12,40 +17,10 @@ definitions:
       error:
         type: string
     type: object
-  model.App:
+  common.SuccResponse:
     properties:
-      attrs:
-        items:
-          $ref: '#/definitions/model.Attr'
-        type: array
-      created_at:
-        type: integer
-      id:
-        type: integer
-      name:
+      succ:
         type: string
-      updated_at:
-        type: integer
-    type: object
-  model.Attr:
-    properties:
-      app_id:
-        type: integer
-      context:
-        description: 内容
-        type: string
-      created_at:
-        type: integer
-      id:
-        type: integer
-      name:
-        description: Tab
-        type: string
-      type:
-        description: 1 chat completion 2 img
-        type: integer
-      updated_at:
-        type: integer
     type: object
 host: localhost:8080
 info:
@@ -64,7 +39,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/model.App'
+              $ref: '#/definitions/api.App'
             type: array
         "500":
           description: Internal Server Error
@@ -83,14 +58,14 @@ paths:
         name: app
         required: true
         schema:
-          $ref: '#/definitions/model.App'
+          $ref: '#/definitions/api.App'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.App'
+            $ref: '#/definitions/api.App'
         "400":
           description: Bad Request
           schema:
@@ -102,6 +77,35 @@ paths:
       summary: Create a new app
       tags:
       - v1
+  /v1/apps/{app_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an app by app ID
+      parameters:
+      - description: App ID
+        in: path
+        name: app_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully deleted app
+          schema:
+            $ref: '#/definitions/common.SuccResponse'
+        "400":
+          description: Invalid app ID
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Delete an app
+      tags:
+      - App
   /v1/apps/{id}:
     get:
       description: Get app by ID
@@ -117,7 +121,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.App'
+            $ref: '#/definitions/api.App'
         "400":
           description: Bad Request
           schema:
@@ -133,6 +137,40 @@ paths:
       summary: Get app by ID
       tags:
       - v1
+    put:
+      consumes:
+      - application/json
+      description: 根据提供的应用ID和更新的应用数据更新应用信息
+      parameters:
+      - description: 应用ID
+        in: path
+        name: app_id
+        required: true
+        type: string
+      - description: 更新的应用数据
+        in: body
+        name: appData
+        required: true
+        schema:
+          $ref: '#/definitions/api.App'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.App'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: 更新应用
+      tags:
+      - App
   /v1/gpt/chat-completion:
     get:
       consumes:

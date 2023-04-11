@@ -2,7 +2,7 @@
 
 ~/.gopen.toml
 
-
+swagger
 
 # gopen
 gopen api

@@ -5,14 +5,14 @@ import (
 	"strings"
 
 	"github.com/sashabaranov/go-openai"
+	"gorm.io/gorm"
 )
 
 // 商品
-
 type App struct {
 	Name  string `json:"name,omitempty"`
 	Attrs []Attr `json:"attrs,omitempty"`
-	BaseModel
+	gorm.Model
 }
 
 type Attr struct {
@@ -20,19 +20,8 @@ type Attr struct {
 	Name    string `json:"name,omitempty"`    // Tab
 	Context string `json:"context,omitempty"` // 内容
 	AppID   int32  `json:"app_id,omitempty"`
-	BaseModel
+	gorm.Model
 }
-
-type BaseModel struct {
-	ID        uint  `gorm:"primarykey" json:"id,omitempty"`
-	CreatedAt int64 `json:"created_at,omitempty"`
-	UpdatedAt int64 `json:"updated_at,omitempty"`
-}
-
-// type AppAttr struct {
-// 	AppId  int32
-// 	AttrId int32
-// }
 
 var contextChat = []openai.ChatCompletionMessage{
 	{
