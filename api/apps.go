@@ -13,10 +13,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type App struct {
-	Name string `json:"name,omitempty"`
-}
-
 // type Attr struct {
 // 	ID      uint   `gorm:"primarykey"`
 // 	Type    int32  `json:"type,omitempty"`    // 1 chat completion 2 img

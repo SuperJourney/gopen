@@ -766,7 +766,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "商城商品"
                 }
             }
         },
@@ -856,7 +857,7 @@ const docTemplate = `{
         "api.UserMessage": {
             "type": "object",
             "properties": {
-                "context": {
+                "content": {
                     "type": "string"
                 }
             }

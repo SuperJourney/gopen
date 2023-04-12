@@ -14,20 +14,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserMessage struct {
-	Context string
-}
-
-type ChatCompletionMessage struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
-}
-
-type ImgMessage struct {
-	Prompt string
-	Negive string
-}
-
 type ChatGptController struct {
 	// 这里可以注入一些服务或数据库连接
 	Query *query.Query
@@ -38,8 +24,6 @@ func NewChatGptController() *ChatGptController {
 		Query: query.Use(infra.DB),
 	}
 }
-
-var client = GetClient()
 
 func GetClient() *openai.Client {
 
@@ -84,7 +68,7 @@ func TextCompletion(c *gin.Context) {
 	}
 
 	// 调用OpenAI生成文本
-	resp, err := client.CreateCompletion(context.Background(), req)
+	resp, err := GetClient().CreateCompletion(context.Background(), req)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -92,10 +76,6 @@ func TextCompletion(c *gin.Context) {
 
 	// 将生成的文本以JSON格式返回
 	c.JSON(http.StatusOK, resp.Choices[0].Text)
-}
-
-type ChatCompletionResponse struct {
-	Context string
 }
 
 // ChatCompletion generates chat completion text based on given input messages.
@@ -169,7 +149,7 @@ func (ctrl *ChatGptController) ChatCompletion(c *gin.Context) {
 	}
 
 	// 调用OpenAI生成文本
-	resp, err := client.CreateChatCompletion(context.Background(), req)
+	resp, err := GetClient().CreateChatCompletion(context.Background(), req)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
