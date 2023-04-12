@@ -293,7 +293,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Creates a new Attr with the provided data",
+                "description": "用户通用属性创建，如果是文字和图片场景，请参考 对话Attr创建 和 图片Attr创建",
                 "consumes": [
                     "application/json"
                 ],
@@ -303,7 +303,7 @@ const docTemplate = `{
                 "tags": [
                     "Attr"
                 ],
-                "summary": "Create a new Attr",
+                "summary": "通用Attr创建",
                 "parameters": [
                     {
                         "type": "integer",
@@ -400,7 +400,7 @@ const docTemplate = `{
         },
         "/v1/apps/{app_id}/chat_attrs": {
             "post": {
-                "description": "Creates a new Attr with the provided data",
+                "description": "使用提供的数据创建新的 对话Attr",
                 "consumes": [
                     "application/json"
                 ],
@@ -410,11 +410,11 @@ const docTemplate = `{
                 "tags": [
                     "Attr"
                 ],
-                "summary": "Create a new Attr",
+                "summary": "对话Attr创建",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "App ID",
+                        "description": "应用ID",
                         "name": "app_id",
                         "in": "path",
                         "required": true
@@ -453,7 +453,7 @@ const docTemplate = `{
         },
         "/v1/apps/{app_id}/imag_attrs": {
             "post": {
-                "description": "创建一个文本类应用属性",
+                "description": "使用提供的数据创建新的 图片Attr",
                 "consumes": [
                     "application/json"
                 ],
@@ -463,7 +463,7 @@ const docTemplate = `{
                 "tags": [
                     "Attr"
                 ],
-                "summary": "创建一个文本类应用属性",
+                "summary": "图片Attr创建",
                 "parameters": [
                     {
                         "type": "integer",
@@ -605,49 +605,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/gpt/chat-completion": {
-            "get": {
-                "description": "基于OpenAI的Chat Completion API，生成对话文本。",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "v1"
-                ],
-                "summary": "使用OpenAI生成对话文本",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "对话角色",
-                        "name": "role",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "对话内容",
-                        "name": "content",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功生成对话文本",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "生成对话文本失败",
-                        "schema": {}
-                    }
-                }
-            }
-        },
         "/v1/gpt/text-completion": {
             "get": {
                 "description": "Generate text completion based on prompt",
@@ -687,6 +644,59 @@ const docTemplate = `{
                         "description": "Internal server error",
                         "schema": {
                             "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/gpt/{attrID}/chat-completion": {
+            "post": {
+                "description": "Generate chat completion text based on input messages.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ChatGpt"
+                ],
+                "summary": "Generate Chat Completion",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Attr ID",
+                        "name": "attrID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User Messages",
+                        "name": "userMessage",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.UserMessage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.ChatCompletionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorResponse"
                         }
                     }
                 }
@@ -765,18 +775,27 @@ const docTemplate = `{
             "properties": {
                 "context": {
                     "description": "内容",
-                    "type": "string"
+                    "type": "string",
+                    "example": "{\"content\":\"请问当前时间是几点？\",\"role\":\"user\"}"
                 },
                 "id": {
-                    "type": "integer"
+                    "description": "Example ID",
+                    "type": "integer",
+                    "example": 1
                 },
                 "name": {
                     "description": "Tab",
-                    "type": "string"
+                    "type": "string",
+                    "example": "商城商品"
                 },
                 "type": {
                     "description": "1 chat completion 2 img",
-                    "type": "integer"
+                    "type": "integer",
+                    "enum": [
+                        1,
+                        2
+                    ],
+                    "example": 1
                 }
             }
         },
@@ -794,11 +813,13 @@ const docTemplate = `{
                 },
                 "name": {
                     "description": "Tab",
-                    "type": "string"
+                    "type": "string",
+                    "example": "商城商品"
                 },
                 "type": {
                     "description": "1 chat completion 2 img",
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -813,6 +834,14 @@ const docTemplate = `{
                 }
             }
         },
+        "api.ChatCompletionResponse": {
+            "type": "object",
+            "properties": {
+                "context": {
+                    "type": "string"
+                }
+            }
+        },
         "api.Prompt": {
             "type": "object",
             "properties": {
@@ -820,6 +849,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.UserMessage": {
+            "type": "object",
+            "properties": {
+                "context": {
                     "type": "string"
                 }
             }

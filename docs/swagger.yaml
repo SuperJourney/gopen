@@ -9,14 +9,22 @@ definitions:
     properties:
       context:
         description: 内容
+        example: '{"content":"请问当前时间是几点？","role":"user"}'
         type: string
       id:
+        description: Example ID
+        example: 1
         type: integer
       name:
         description: Tab
+        example: 商城商品
         type: string
       type:
         description: 1 chat completion 2 img
+        enum:
+        - 1
+        - 2
+        example: 1
         type: integer
     type: object
   api.ChatAttr:
@@ -29,9 +37,11 @@ definitions:
         type: integer
       name:
         description: Tab
+        example: 商城商品
         type: string
       type:
         description: 1 chat completion 2 img
+        example: 1
         type: integer
     type: object
   api.ChatCompletionMessage:
@@ -41,11 +51,21 @@ definitions:
       role:
         type: string
     type: object
+  api.ChatCompletionResponse:
+    properties:
+      context:
+        type: string
+    type: object
   api.Prompt:
     properties:
       id:
         type: string
       text:
+        type: string
+    type: object
+  api.UserMessage:
+    properties:
+      context:
         type: string
     type: object
   common.ErrorResponse:
@@ -170,7 +190,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Creates a new Attr with the provided data
+      description: 用户通用属性创建，如果是文字和图片场景，请参考 对话Attr创建 和 图片Attr创建
       parameters:
       - description: App ID
         in: path
@@ -198,7 +218,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/common.ErrorResponse'
-      summary: Create a new Attr
+      summary: 通用Attr创建
       tags:
       - Attr
   /v1/apps/{app_id}/attrs/{attr_id}:
@@ -241,9 +261,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: Creates a new Attr with the provided data
+      description: 使用提供的数据创建新的 对话Attr
       parameters:
-      - description: App ID
+      - description: 应用ID
         in: path
         name: app_id
         required: true
@@ -269,14 +289,14 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/common.ErrorResponse'
-      summary: Create a new Attr
+      summary: 对话Attr创建
       tags:
       - Attr
   /v1/apps/{app_id}/imag_attrs:
     post:
       consumes:
       - application/json
-      description: 创建一个文本类应用属性
+      description: 使用提供的数据创建新的 图片Attr
       parameters:
       - description: App ID
         in: path
@@ -306,7 +326,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/common.ErrorResponse'
-      summary: 创建一个文本类应用属性
+      summary: 图片Attr创建
       tags:
       - Attr
   /v1/apps/{appID}/attrs/{attrID}:
@@ -459,35 +479,41 @@ paths:
       summary: 更新应用
       tags:
       - App
-  /v1/gpt/chat-completion:
-    get:
+  /v1/gpt/{attrID}/chat-completion:
+    post:
       consumes:
       - application/json
-      description: 基于OpenAI的Chat Completion API，生成对话文本。
+      description: Generate chat completion text based on input messages.
       parameters:
-      - description: 对话角色
-        in: query
-        name: role
+      - description: Attr ID
+        in: path
+        name: attrID
         required: true
-        type: string
-      - description: 对话内容
-        in: query
-        name: content
+        type: integer
+      - description: User Messages
+        in: body
+        name: userMessage
         required: true
-        type: string
+        schema:
+          $ref: '#/definitions/api.UserMessage'
       produces:
       - application/json
       responses:
         "200":
-          description: 成功生成对话文本
+          description: OK
           schema:
-            type: string
+            $ref: '#/definitions/api.ChatCompletionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
         "500":
-          description: 生成对话文本失败
-          schema: {}
-      summary: 使用OpenAI生成对话文本
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Generate Chat Completion
       tags:
-      - v1
+      - ChatGpt
   /v1/gpt/text-completion:
     get:
       consumes:

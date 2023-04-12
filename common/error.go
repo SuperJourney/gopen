@@ -15,7 +15,7 @@ type SuccResponse struct {
 }
 
 func Error(c *gin.Context, code int, err error) {
-	c.AbortWithStatusJSON(code, err)
+	c.AbortWithStatusJSON(code, gin.H{"error": err.Error()})
 }
 
 func Succ(c *gin.Context) {

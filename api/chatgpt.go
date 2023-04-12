@@ -2,16 +2,41 @@ package api
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"net/http"
 
+	"github.com/SuperJourney/gopen/common"
 	"github.com/SuperJourney/gopen/infra"
+	"github.com/SuperJourney/gopen/repo/query"
 	"github.com/gin-gonic/gin"
 	"github.com/sashabaranov/go-openai"
+	"gorm.io/gorm"
 )
+
+type UserMessage struct {
+	Context string
+}
 
 type ChatCompletionMessage struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
+}
+
+type ImgMessage struct {
+	Prompt string
+	Negive string
+}
+
+type ChatGptController struct {
+	// 这里可以注入一些服务或数据库连接
+	Query *query.Query
+}
+
+func NewChatGptController() *ChatGptController {
+	return &ChatGptController{
+		Query: query.Use(infra.DB),
+	}
 }
 
 var client = GetClient()
@@ -69,39 +94,76 @@ func TextCompletion(c *gin.Context) {
 	c.JSON(http.StatusOK, resp.Choices[0].Text)
 }
 
-// @Summary 使用OpenAI生成对话文本
-// @Description 基于OpenAI的Chat Completion API，生成对话文本。
-// @Tags v1
+type ChatCompletionResponse struct {
+	Context string
+}
+
+// ChatCompletion generates chat completion text based on given input messages.
+// @Summary Generate Chat Completion
+// @Description Generate chat completion text based on input messages.
+// @Tags ChatGpt
 // @Accept json
 // @Produce json
-// @Param role query string true "对话角色"
-// @Param content query string true "对话内容"
-// @Success 200 {string} string "成功生成对话文本"
-// @Failure 500 {object} error "生成对话文本失败"
-// @Router /v1/gpt/chat-completion [get]
-func ChatCompletion(c *gin.Context) {
+// @Param attrID path integer true "Attr ID"
+// @Param userMessage body UserMessage true "User Messages"
+// @Success 200 {object} ChatCompletionResponse
+// @Failure 400 {object} common.ErrorResponse
+// @Failure 500 {object} common.ErrorResponse
+// @Router /v1/gpt/{attrID}/chat-completion [post]
+func (ctrl *ChatGptController) ChatCompletion(c *gin.Context) {
+	attrID, ok := GetAttrID(c)
+	if !ok {
+		return
+	}
 
+	var userMessage openai.ChatCompletionMessage
+	if err := c.BindJSON(&userMessage); err != nil {
+		common.Error(c, http.StatusBadRequest, err)
+		return
+	}
+	userMessage.Role = openai.ChatMessageRoleUser
+
+	// 根据attrID 获取context
+	db := ctrl.Query.Attr
+	attrModel, err := db.Where(db.ID.Eq(uint(attrID)), db.Type.Eq(TYPE_CHAT_COMPLETION)).First()
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			common.Error(c, http.StatusBadRequest, errors.New("没有找到符合条件的attr"))
+			return
+		}
+	}
+	var messages []openai.ChatCompletionMessage
+	if err := json.Unmarshal([]byte(attrModel.Context), &messages); err != nil {
+		common.Info("err:%v", err)
+		common.Error(c, http.StatusInternalServerError, errors.New("attr信息异常"))
+		return
+	}
+
+	messages = append(messages, userMessage)
+
+	// Example
+	// []openai.ChatCompletionMessage{
+	// 	{
+	// 		Role:    openai.ChatMessageRoleSystem,
+	// 		Content: "你是一个商品设计小组手,根据用户少量的提示词就可以给出极具创造力，吸引力的标题",
+	// 	},
+	// 	{
+	// 		Role:    openai.ChatMessageRoleUser,
+	// 		Content: "口红，女性， 颜色",
+	// 	},
+	// 	{
+	// 		Role:    openai.ChatMessageRoleAssistant,
+	// 		Content: "最时尚的口红色彩",
+	// 	},
+	// 	{
+	// 		Role:    openai.ChatMessageRoleUser,
+	// 		Content: "球鞋，跳高，特步",
+	// 	},
+	// }
 	// 创建文本生成请求
 	req := openai.ChatCompletionRequest{
-		Model: openai.GPT3Dot5Turbo,
-		Messages: []openai.ChatCompletionMessage{
-			{
-				Role:    openai.ChatMessageRoleSystem,
-				Content: "你是一个商品设计小组手,根据用户少量的提示词就可以给出极具创造力，吸引力的标题",
-			},
-			{
-				Role:    openai.ChatMessageRoleUser,
-				Content: "口红，女性， 颜色",
-			},
-			{
-				Role:    openai.ChatMessageRoleAssistant,
-				Content: "最时尚的口红色彩",
-			},
-			{
-				Role:    openai.ChatMessageRoleUser,
-				Content: "球鞋，跳高，特步",
-			},
-		},
+		Model:    openai.GPT3Dot5Turbo,
+		Messages: messages,
 		// MaxTokens: int(infra.Setting.ChatGPT.MaxTokens),
 		// Temperature: infra.Setting.ChatGPT.Temperature,
 	}
@@ -114,11 +176,11 @@ func ChatCompletion(c *gin.Context) {
 	}
 
 	// 将生成的文本以JSON格式返回
-	c.JSON(http.StatusOK, resp.Choices[0].Message.Content)
+	c.JSON(http.StatusOK, gin.H{"context": resp.Choices[0].Message.Content})
 }
 
 func init() {
-	r := infra.GetApiEngine()
-	r.GET("/gpt/text-completion", TextCompletion)
-	r.GET("/gpt/chat-completion", ChatCompletion)
+	router := infra.GetApiEngine()
+	chatCtrl := NewChatGptController()
+	router.POST("/gpt/:attr_id/chat-completion", chatCtrl.ChatCompletion)
 }

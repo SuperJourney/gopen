@@ -20,6 +20,13 @@ services:
     networks:
       - app_net
 
+  dbadmin:
+    image: sqlitebrowser/sqlitebrowser
+    ports:
+      - "3700:8080"
+    volumes:
+      - data:/data      
+
   proxy:
     image: nginx
     volumes:

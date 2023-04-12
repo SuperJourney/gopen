@@ -16,16 +16,16 @@ import (
 )
 
 type Attr struct {
-	ID      uint
-	Type    int32  `json:"type,omitempty"`    // 1 chat completion 2 img
-	Name    string `json:"name,omitempty"`    // Tab
-	Context string `json:"context,omitempty"` // 内容
+	ID      uint   `json:"id" example:"1"`                                                             // Example ID
+	Type    int32  `json:"type,omitempty" enums:"1,2" example:"1"`                                     // 1 chat completion 2 img
+	Name    string `json:"name,omitempty" example:"商城商品"`                                              // Tab
+	Context string `json:"context,omitempty" example:"{\"content\":\"请问当前时间是几点？\",\"role\":\"user\"}"` // 内容
 }
 
 type ChatAttr struct {
 	ID      uint
-	Type    int32  `json:"type,omitempty"` // 1 chat completion 2 img
-	Name    string `json:"name,omitempty"` // Tab
+	Type    int32  `json:"type,omitempty" example:"1"`    // 1 chat completion 2 img
+	Name    string `json:"name,omitempty" example:"商城商品"` // Tab
 	Context []ChatCompletionMessage
 }
 
@@ -70,7 +70,7 @@ func (ctrl *AttrController) GetAttrs(c *gin.Context) {
 
 	// Query the app by ID
 	attrDB := ctrl.Query.Attr
-	attrs, err := attrDB.Where(attrDB.AppID.Eq(int32(appIdIntger))).Find()
+	attrs, err := attrDB.Where(attrDB.AppID.Eq(int32(appIdIntger))).Debug().Find()
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -124,8 +124,8 @@ func (ctrl *AttrController) GetAttr(c *gin.Context) {
 	})
 }
 
-// @Summary Create a new Attr
-// @Description Creates a new Attr with the provided data
+// @Summary 通用Attr创建
+// @Description 用户通用属性创建，如果是文字和图片场景，请参考 对话Attr创建 和 图片Attr创建
 // @Tags Attr
 // @Accept json
 // @Produce json
@@ -183,12 +183,12 @@ func (ctrl *AttrController) CreateAttr(c *gin.Context) {
 	})
 }
 
-// @Summary Create a new Attr
-// @Description Creates a new Attr with the provided data
+// @Summary 对话Attr创建
+// @Description 使用提供的数据创建新的 对话Attr
 // @Tags Attr
 // @Accept json
 // @Produce json
-// @Param app_id path int true "App ID"
+// @Param app_id path int true "应用ID"
 // @Param appData body ChatAttr true "更新的应用数据"
 // @Success 200 {object} Attr
 // @Failure 400 {object} common.ErrorResponse
@@ -251,8 +251,8 @@ func (ctrl *AttrController) CreateChatAttr(c *gin.Context) {
 	})
 }
 
-// @Summary 创建一个文本类应用属性
-// @Description  创建一个文本类应用属性
+// @Summary 图片Attr创建
+// @Description  使用提供的数据创建新的 图片Attr
 // @Tags Attr
 // @Accept json
 // @Produce json
@@ -453,15 +453,15 @@ func GetAttrID(c *gin.Context) (int, bool) {
 
 func init() {
 	router := infra.GetApiEngine()
-	appCtrl := NewAttrController()
+	attCtrl := NewAttrController()
 
 	// Attr 相关路由
-	router.GET("/apps/:app_id/attrs/", appCtrl.GetAttrs)
-	router.GET("/apps/:app_id/attrs/:attr_id", appCtrl.GetAttr)
-	router.POST("/apps/:app_id/attrs", appCtrl.CreateAttr)
-	router.POST("/apps/:app_id/chat_attrs", appCtrl.CreateChatAttr)
-	router.POST("/apps/:app_id/img_attrs", appCtrl.CreateChatImagAttr)
-	router.PUT("/apps/:app_id/attrs/:attr_id", appCtrl.UpdateAttr)
-	router.DELETE("/apps/:app_id/attrs/:attr_id", appCtrl.DeleteAttr)
+	router.GET("/apps/:app_id/attrs/", attCtrl.GetAttrs)
+	router.GET("/apps/:app_id/attrs/:attr_id", attCtrl.GetAttr)
+	router.POST("/apps/:app_id/attrs", attCtrl.CreateAttr)
+	router.POST("/apps/:app_id/chat_attrs", attCtrl.CreateChatAttr)
+	router.POST("/apps/:app_id/img_attrs", attCtrl.CreateChatImagAttr)
+	router.PUT("/apps/:app_id/attrs/:attr_id", attCtrl.UpdateAttr)
+	router.DELETE("/apps/:app_id/attrs/:attr_id", attCtrl.DeleteAttr)
 
 }
