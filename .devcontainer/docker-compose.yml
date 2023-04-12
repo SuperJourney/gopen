@@ -11,14 +11,6 @@ services:
     privileged: true
     # network_mode: service:db
     command: sleep infinity
-  sqlitebrowser:
-    image: lscr.io/linuxserver/sqlitebrowser:latest
-    ports:
-      - 3200:3000
-      - 3201:3001
-    volumes:
-      - data:/data      
-    restart: unless-stopped
 
 volumes:
     data:
