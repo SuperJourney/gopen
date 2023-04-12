@@ -30,7 +30,12 @@ var initDB = &cobra.Command{
 				fmt.Println(err)
 				return
 			}
-			f.Close()
+			defer f.Close()
+
+			if err := f.Chmod(0777); err != nil {
+				fmt.Println("设置文件权限失败:", err)
+				return
+			}
 
 			db, err := gorm.Open(sqlite.Open(dbFile), &gorm.Config{})
 			if err != nil {
