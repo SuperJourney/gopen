@@ -20,12 +20,14 @@ services:
     networks:
       - app_net
 
-  dbadmin:
-    image: sqlitebrowser/sqlitebrowser
+  sqlitebrowser:
+    image: lscr.io/linuxserver/sqlitebrowser:latest
     ports:
-      - "3700:8080"
+      - 3000:3000
+      - 3001:3001
     volumes:
       - data:/data      
+    restart: unless-stopped
 
   proxy:
     image: nginx
