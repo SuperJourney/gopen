@@ -8,14 +8,19 @@ COPY go.mod /www
 RUN  go mod download
 
 COPY . /www
+
+
+FROM build as init
+ENV CGO_ENABLED=0
+RUN go build 
+
+FROM build as deploy
 ENV CGO_ENABLED=0
 RUN go install github.com/swaggo/swag/cmd/swag@latest && swag init
-RUN  go run cmd/main.go  migration init --dbfile /data/gopen.db
 RUN  go build -o server
-
 
 FROM alpine:3.12
 EXPOSE 8080
 
-COPY --from=build /www/server /bin
+COPY --from=deploy /www/server /bin
 CMD ["/bin/server"]

@@ -14,20 +14,44 @@ services:
       - .:/workspaces/gopen:cached
       - data:/data
     privileged: true
-    # command: sleep infinity
-    # ports:
-    #   - "8080:8080"
     networks:
       - app_net
+      
+  gopen-init:
+    build: 
+      context: .
+      target: init
+      ssh:
+        - default
+      args:
+        - GOPROXY=${GOPROXY}
+    environment:
+      - GO111MODULE=on
+      - GOPROXY=${GOPROXY}
+    volumes:
+      - data:/data
+    # command: "sleep infinity"
+    command: "rm -f /data/gopen.db && go run cmd/main.go  migration init --dbfile /data/gopen.db"
+    privileged: true
+    networks:
+      - app_net
+
 
   sqlitebrowser:
     image: lscr.io/linuxserver/sqlitebrowser:latest
     ports:
       - 3000:3000
       - 3001:3001
+    environment:
+      - UID=1000
+      - GID=1000
+    privileged: true
+    command: "chmod abc:abc"
     volumes:
-      - data:/data      
+      - data:/data:rw
     restart: unless-stopped
+    networks:
+      - app_net
 
   proxy:
     image: nginx
