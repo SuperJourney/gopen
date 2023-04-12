@@ -9,7 +9,7 @@ RUN  go mod download
 
 COPY . /www
 ENV CGO_ENABLED=0
-RUN swag init
+RUN go install github.com/swaggo/swag/cmd/swag@latest && swag init
 RUN  go run cmd/main.go  migration init --dbfile /data/db
 RUN  go build -o server
 
