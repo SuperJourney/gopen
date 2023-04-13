@@ -664,6 +664,9 @@
                 "produces": [
                     "image/jpeg"
                 ],
+                "tags": [
+                    "SD"
+                ],
                 "summary": "图片转换",
                 "parameters": [
                     {
@@ -841,6 +844,10 @@
                     "type": "string"
                 },
                 "prompt": {
+                    "type": "string"
+                },
+                "userMessage": {
+                    "description": "用户输入",
                     "type": "string"
                 }
             }

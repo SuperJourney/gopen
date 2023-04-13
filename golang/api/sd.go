@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -12,6 +13,7 @@ import (
 	"github.com/SuperJourney/gopen/infra"
 	"github.com/SuperJourney/gopen/repo/query"
 	"github.com/gin-gonic/gin"
+	"github.com/sashabaranov/go-openai"
 )
 
 // 生成图片
@@ -27,6 +29,11 @@ func NewSDController() *SDController {
 }
 
 type TextToImgMessage struct {
+	UserMessage string // 用户输入
+	SDParam
+}
+
+type SDParam struct {
 	Prompt         string `json:"prompt,omitempty"`
 	NegativePrompt string `json:"negative_prompt,omitempty"`
 }
@@ -43,6 +50,7 @@ type TextToImgMessage struct {
 // @Failure 500 {object} common.ErrorResponse "错误信息"
 // @Router /v1/sd/{attr_id}/txt2img [post]
 func (ctrl *SDController) TextToImg(c *gin.Context) {
+
 	var param map[string]string = make(map[string]string)
 
 	var x TextToImgMessage
@@ -51,6 +59,31 @@ func (ctrl *SDController) TextToImg(c *gin.Context) {
 			"error": err.Error(),
 		})
 		return
+	}
+
+	if x.UserMessage != "" {
+		var messages []openai.ChatCompletionMessage
+		message := fmt.Sprintf(`
+		"%s"
+		###
+		你是一个prompt工程师，请根据以上内容生成格式为 英文描述，图片风格随机
+		`, x.UserMessage)
+		messages = append(messages, openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleUser,
+			Content: message,
+		})
+		// 当 UserMessage 不为空，将获取 attr 属性翻译出结果
+		resp, err := GetClient().CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+			Model:    openai.GPT3Dot5Turbo,
+			Messages: messages,
+		})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		x.Prompt = x.Prompt + resp.Choices[0].Message.Content
 	}
 
 	param[ParamPrompt] = x.Prompt
@@ -89,7 +122,7 @@ var ImgUrl = func() string {
 
 // ImgToImg 函数处理将一张图片文件上传并转换成另一张图片的请求。
 // @Summary 图片转换
-// @SD
+// @Tags SD
 // @Description 将一张图片文件上传并转换成另一张图片
 // @Accept multipart/form-data
 // @Produce jpeg
