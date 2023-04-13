@@ -1,6 +1,7 @@
 [AppSetting]
 ConfigFile="/workspaces/"
 DBFile="/data/gopen.db"
+SDHOST="python"
 [ChatGPT]
 ApiToken = ""
 MaxTokens = 10

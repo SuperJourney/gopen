@@ -83,7 +83,9 @@ func (ctrl *SDController) TextToImg(c *gin.Context) {
 	c.Writer.Write(imageData)
 }
 
-var ImgUrl = "http://host.docker.internal:5000/"
+var ImgUrl = func() string {
+	return fmt.Sprintf("http://%s/", infra.Setting.SDHOST)
+}
 
 // ImgToImg 函数处理将一张图片文件上传并转换成另一张图片的请求。
 // @Summary 图片转换
@@ -141,7 +143,7 @@ func (ctrl *SDController) ImgToImg(c *gin.Context) {
 	// 完成表单写入
 	fileWriter.Close()
 
-	url := ImgUrl + "img2img"
+	url := ImgUrl() + "img2img"
 	// 创建 POST 请求
 	req, err := http.NewRequest("POST", url, fileBuf)
 	if err != nil {
@@ -202,7 +204,7 @@ func Request_Text2Img(param map[string]string) (*http.Response, error) {
 	// 关闭请求体写入
 	writer.Close()
 
-	URL := ImgUrl + "txt2img"
+	URL := ImgUrl() + "txt2img"
 	// 创建 POST 请求
 	req, err := http.NewRequest("POST", URL, body)
 	if err != nil {

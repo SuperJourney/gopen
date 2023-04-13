@@ -62,6 +62,12 @@ services:
       - "7211:7211"
     networks:
       - app_net
+
+  python:
+    build: 
+      context: ./python
+    networks:
+      - app_net
   
 volumes:
   data:
