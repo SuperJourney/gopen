@@ -1,16 +1,13 @@
 version: '3.9'
 services:
-  devcontainer:
+  python-dev:
     build: 
       context: .
       ssh:
         - default
     volumes:
-      - ..:/workspaces/gopen:cached
-      - data:/data
+      - ../..:/workspaces:cached
     privileged: true
     # network_mode: service:db
     command: sleep infinity
 
-volumes:
-    data:

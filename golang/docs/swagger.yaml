@@ -64,6 +64,13 @@ definitions:
       text:
         type: string
     type: object
+  api.TextToImgMessage:
+    properties:
+      negative_prompt:
+        type: string
+      prompt:
+        type: string
+    type: object
   api.UserMessage:
     properties:
       content:
@@ -330,7 +337,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/common.ErrorResponse'
-      summary: 对话Attr创建
+      summary: 对话Attr更新
       tags:
       - Attr
   /v1/apps/{appID}/attrs/{attrID}:
@@ -537,6 +544,68 @@ paths:
       summary: Retrieve a prompt by ID
       tags:
       - v1
+  /v1/sd/:attr_id/img2img:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 将一张图片文件上传并转换成另一张图片
+      parameters:
+      - description: App ID
+        in: path
+        name: attrID
+        required: true
+        type: integer
+      - description: 待上传的图片文件
+        in: formData
+        name: image
+        required: true
+        type: file
+      responses:
+        "200":
+          description: 图片文件
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: 图片转换
+  /v1/sd/{attr_id}/txt2img:
+    post:
+      consumes:
+      - application/json
+      description: 将文本转换为图片
+      parameters:
+      - description: Attribute ID
+        format: int32
+        in: path
+        name: attr_id
+        required: true
+        type: integer
+      - description: 更新的应用数据
+        in: body
+        name: appData
+        required: true
+        schema:
+          $ref: '#/definitions/api.TextToImgMessage'
+      produces:
+      - image/jpeg
+      responses:
+        "200":
+          description: 图片文件
+          schema:
+            type: file
+        "500":
+          description: 错误信息
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: 文本转图片
+      tags:
+      - SD
   /v2/prompt/{id}:
     get:
       description: Retrieves a prompt by ID
