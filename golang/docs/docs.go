@@ -691,17 +691,20 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/sd/:attr_id/img2img": {
+        "/v1/sd/{attr_id}/img2img": {
             "post": {
                 "description": "将一张图片文件上传并转换成另一张图片",
                 "consumes": [
                     "multipart/form-data"
                 ],
+                "produces": [
+                    "image/jpeg"
+                ],
                 "summary": "图片转换",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "App ID",
+                        "description": "Attr ID",
                         "name": "attrID",
                         "in": "path",
                         "required": true
@@ -753,7 +756,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "format": "int32",
-                        "description": "Attribute ID",
+                        "description": "Attr ID",
                         "name": "attr_id",
                         "in": "path",
                         "required": true

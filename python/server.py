@@ -38,13 +38,28 @@ def txt2img():
 
 @app.route('/img2img', methods=['POST'])
 def img2img():
-    # 从请求中获取图片文件
-    print(request.files)
-
     file = request.files['file']
-    # 保存图片文件到本地
-    file.save('./images/received_image.jpg')
-    return '图片上传成功！'
+    image = Image.open(file)
+    # prompt = request.form['prompt']
+    prompt = "blue"
+    # negative_prompt = request.form['negative_prompt']
+    result1 = api.img2img(
+        images=[image],  # Pass the image as a list
+        prompt=prompt,
+        # negative_prompt=negative_prompt,
+        seed=1003,
+        styles=["anime"],
+        cfg_scale=7,
+    )
+    
+    image_stream = io.BytesIO()
+    result1.image.save(image_stream, format='JPEG')
+    image_stream.seek(0)
+    return send_file(
+        image_stream,
+        mimetype='image/jpeg'
+    )
+
 
 
 if __name__ == '__main__':

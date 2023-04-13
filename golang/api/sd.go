@@ -37,7 +37,7 @@ type TextToImgMessage struct {
 // @Tags SD
 // @Accept application/json
 // @Produce jpeg
-// @Param attr_id path int true "Attribute ID" format(int32)
+// @Param attr_id path int true "Attr ID" format(int32)
 // @Param appData body TextToImgMessage true "更新的应用数据"
 // @Success 200 {file} jpeg "图片文件"
 // @Failure 500 {object} common.ErrorResponse "错误信息"
@@ -90,12 +90,13 @@ var ImgUrl = "http://host.docker.internal:5000/"
 // @SD
 // @Description 将一张图片文件上传并转换成另一张图片
 // @Accept multipart/form-data
-// @Param attrID path int true "App ID"
+// @Produce jpeg
+// @Param attrID path int true "Attr ID"
 // @Param image formData file true "待上传的图片文件"
-// @Success 200 {file} jpg "图片文件"
+// @Success 200 {file} jpeg "图片文件"
 // @Failure 400 {object} common.ErrorResponse
 // @Failure 500 {object} common.ErrorResponse
-// @Router /v1/sd/:attr_id/img2img [post]
+// @Router /v1/sd/{attr_id}/img2img [post]
 func (ctrl *SDController) ImgToImg(c *gin.Context) {
 	file, err := c.FormFile("image")
 	if err != nil {
@@ -140,30 +141,44 @@ func (ctrl *SDController) ImgToImg(c *gin.Context) {
 	// 完成表单写入
 	fileWriter.Close()
 
+	url := ImgUrl + "img2img"
 	// 创建 POST 请求
-	req, err := http.NewRequest("POST", ImgUrl, fileBuf)
+	req, err := http.NewRequest("POST", url, fileBuf)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
-
-	// 设置 Content-Type 头部
-	req.Header.Set("Content-Type", fileWriter.FormDataContentType())
-
 	// 创建 HTTP 客户端
 	client := &http.Client{}
+	// 设置 Content-Type 头部
+	req.Header.Set("Content-Type", fileWriter.FormDataContentType())
 	// 发送请求
-	response, err := client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
-	defer response.Body.Close()
+	defer resp.Body.Close()
 
+	// 读取图片文件内容到内存中
+	imageData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// 设置响应头部的Content-Type和Content-Length字段
+	c.Header("Content-Type", "image/jpeg")
+	c.Header("Content-Length", strconv.Itoa(len(imageData)))
+
+	// 将图片内容写入响应体
+	c.Writer.Write(imageData)
 }
 
 const ParamPrompt string = "prompt"
