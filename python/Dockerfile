@@ -7,6 +7,8 @@ ENTRYPOINT [ "python" ]
 
 WORKDIR /www
 
+EXPOSE 5000
+
 COPY . .
 
 CMD ["server.py"]
