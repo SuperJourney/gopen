@@ -8,4 +8,12 @@ import (
 
 var Setting = config.LoadConfig()
 
-var DB, _ = gorm.Open(sqlite.Open(Setting.DBFile), &gorm.Config{})
+var DB *gorm.DB
+
+func init() {
+	var err error
+	DB, err = gorm.Open(sqlite.Open(Setting.DBFile), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+}
