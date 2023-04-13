@@ -451,9 +451,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/apps/{app_id}/imag_attrs": {
-            "post": {
-                "description": "使用提供的数据创建新的 图片Attr",
+        "/v1/apps/{app_id}/chat_attrs/{attr_id}": {
+            "put": {
+                "description": "使用提供的数据创建新的 对话Attr",
                 "consumes": [
                     "application/json"
                 ],
@@ -463,12 +463,19 @@ const docTemplate = `{
                 "tags": [
                     "Attr"
                 ],
-                "summary": "图片Attr创建",
+                "summary": "对话Attr创建",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "App ID",
+                        "description": "应用ID",
                         "name": "app_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "AttrID",
+                        "name": "attr_id",
                         "in": "path",
                         "required": true
                     },
@@ -478,10 +485,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/api.ChatCompletionMessage"
-                            }
+                            "$ref": "#/definitions/api.ChatAttr"
                         }
                     }
                 ],
@@ -600,50 +604,6 @@ const docTemplate = `{
                         "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/common.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/gpt/text-completion": {
-            "get": {
-                "description": "Generate text completion based on prompt",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "v1"
-                ],
-                "summary": "Generate Text Completion",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Prompt for text completion",
-                        "name": "prompt",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Maximum number of tokens to generate",
-                        "name": "max_tokens",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Generated text",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
                         }
                     }
                 }
@@ -782,7 +742,7 @@ const docTemplate = `{
                 "id": {
                     "description": "Example ID",
                     "type": "integer",
-                    "example": 1
+                    "example": 0
                 },
                 "name": {
                     "description": "Tab",

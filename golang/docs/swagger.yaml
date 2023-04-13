@@ -14,7 +14,7 @@ definitions:
         type: string
       id:
         description: Example ID
-        example: 1
+        example: 0
         type: integer
       name:
         description: Tab
@@ -293,15 +293,20 @@ paths:
       summary: 对话Attr创建
       tags:
       - Attr
-  /v1/apps/{app_id}/imag_attrs:
-    post:
+  /v1/apps/{app_id}/chat_attrs/{attr_id}:
+    put:
       consumes:
       - application/json
-      description: 使用提供的数据创建新的 图片Attr
+      description: 使用提供的数据创建新的 对话Attr
       parameters:
-      - description: App ID
+      - description: 应用ID
         in: path
         name: app_id
+        required: true
+        type: integer
+      - description: AttrID
+        in: path
+        name: attr_id
         required: true
         type: integer
       - description: 更新的应用数据
@@ -309,9 +314,7 @@ paths:
         name: appData
         required: true
         schema:
-          items:
-            $ref: '#/definitions/api.ChatCompletionMessage'
-          type: array
+          $ref: '#/definitions/api.ChatAttr'
       produces:
       - application/json
       responses:
@@ -327,7 +330,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/common.ErrorResponse'
-      summary: 图片Attr创建
+      summary: 对话Attr创建
       tags:
       - Attr
   /v1/apps/{appID}/attrs/{attrID}:
@@ -515,35 +518,6 @@ paths:
       summary: Generate Chat Completion
       tags:
       - ChatGpt
-  /v1/gpt/text-completion:
-    get:
-      consumes:
-      - application/json
-      description: Generate text completion based on prompt
-      parameters:
-      - description: Prompt for text completion
-        in: query
-        name: prompt
-        required: true
-        type: string
-      - description: Maximum number of tokens to generate
-        in: query
-        name: max_tokens
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Generated text
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      summary: Generate Text Completion
-      tags:
-      - v1
   /v1/prompt/{id}:
     get:
       description: Retrieves a prompt by ID

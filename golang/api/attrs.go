@@ -11,7 +11,6 @@ import (
 	"github.com/SuperJourney/gopen/repo/model"
 	"github.com/SuperJourney/gopen/repo/query"
 	"github.com/gin-gonic/gin"
-	"github.com/sashabaranov/go-openai"
 	"gorm.io/gorm"
 )
 
@@ -163,7 +162,6 @@ func (ctrl *AttrController) CreateAttr(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save app data"})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{
 		"attr": attr,
 	})
@@ -237,71 +235,6 @@ func (ctrl *AttrController) CreateChatAttr(c *gin.Context) {
 	})
 }
 
-// @Summary 图片Attr创建
-// @Description  使用提供的数据创建新的 图片Attr
-// @Tags Attr
-// @Accept json
-// @Produce json
-// @Param app_id path int true "App ID"
-// @Param appData body []ChatCompletionMessage true "更新的应用数据"
-// @Success 200 {object} Attr
-// @Failure 400 {object} common.ErrorResponse
-// @Failure 500 {object} common.ErrorResponse
-// @Router /v1/apps/{app_id}/imag_attrs [post]
-func (ctrl *AttrController) CreateChatImagAttr(c *gin.Context) {
-	// TODO 创建时需要判断 app_id是否存在
-	appId, ok := GetAppID(c)
-	if !ok {
-		return
-	}
-
-	var chatMessage []*openai.ChatCompletionMessage
-	if err := c.BindJSON(&chatMessage); err != nil {
-		common.Error(c, http.StatusBadRequest, err)
-		return
-	}
-
-	attr := model.Attr{}
-	// Parse request body to extract app data
-	err := c.BindJSON(&attr)
-	if err != nil {
-		common.Info(err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse request body"})
-		return
-	}
-
-	attr.AppID = int32(appId)
-
-	// Validate app data
-	if attr.Name == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Attr name is required"})
-		return
-	}
-
-	// Validate app data
-	if attr.Type != 1 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Attr type must be chat type"})
-		return
-	}
-
-	// Validate app data
-	if attr.Context == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Attr context is required"})
-		return
-	}
-
-	db := ctrl.Query.Attr
-	// Save app data to database
-	if err := db.Create(&attr); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save app data"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"attr": attr,
-	})
-}
-
 // UpdateAttr godoc
 // @Summary Update an attribute
 // @Description Update an attribute by providing the app ID, attribute ID, and updated attribute information
@@ -345,10 +278,68 @@ func (ctrl *AttrController) UpdateAttr(c *gin.Context) {
 	existingAttr.Context = updatedAttr.Context
 	existingAttr.Type = updatedAttr.Type
 
-	db.Create(existingAttr)
+	db.Save(existingAttr)
 
 	c.JSON(http.StatusOK, gin.H{
 		"app": existingAttr,
+	})
+}
+
+// @Summary 对话Attr更新
+// @Description 使用提供的数据创建新的 对话Attr
+// @Tags Attr
+// @Accept json
+// @Produce json
+// @Param app_id path int true "应用ID"
+// @Param attr_id path int true "AttrID"
+// @Param appData body ChatAttr true "更新的应用数据"
+// @Success 200 {object} Attr
+// @Failure 400 {object} common.ErrorResponse
+// @Failure 500 {object} common.ErrorResponse
+// @Router /v1/apps/{app_id}/chat_attrs/{attr_id} [put]
+func (ctrl *AttrController) UpdateChatAttr(c *gin.Context) {
+	// Get the app ID from the URL parameter
+	appID, ok := GetAppID(c)
+	if !ok {
+		return
+	}
+	attrId, ok := GetAttrID(c)
+	if !ok {
+		return
+	}
+
+	db := ctrl.Query.Attr
+	existingAttr, err := db.Where(db.ID.Eq(uint(attrId))).Where(db.AppID.Eq(int32(appID))).First()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		common.Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	var chatAttr ChatAttr
+	if err := c.BindJSON(&chatAttr); err != nil {
+		common.Error(c, http.StatusBadRequest, err)
+		return
+	}
+
+	context, err := json.Marshal(chatAttr.Context)
+	if err != nil {
+		common.Error(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	existingAttr.Name = chatAttr.Name
+	existingAttr.Context = string(context)
+	existingAttr.Type = chatAttr.Type
+
+	// Save app data to database
+	if err := db.Save(existingAttr); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save app data"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"attr": existingAttr,
 	})
 }
 
@@ -446,8 +437,9 @@ func init() {
 	router.GET("/apps/:app_id/attrs/:attr_id", attCtrl.GetAttr)
 	router.POST("/apps/:app_id/attrs", attCtrl.CreateAttr)
 	router.POST("/apps/:app_id/chat_attrs", attCtrl.CreateChatAttr)
-	router.POST("/apps/:app_id/img_attrs", attCtrl.CreateChatImagAttr)
+	// router.POST("/apps/:app_id/img_attrs", attCtrl.CreateChatImagAttr)
 	router.PUT("/apps/:app_id/attrs/:attr_id", attCtrl.UpdateAttr)
+	router.PUT("/apps/:app_id/chat_attrs/:attr_id", attCtrl.UpdateChatAttr)
 	router.DELETE("/apps/:app_id/attrs/:attr_id", attCtrl.DeleteAttr)
 
 }

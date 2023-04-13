@@ -9,7 +9,7 @@ type App struct {
 }
 
 type Attr struct {
-	ID      uint   `json:"id" example:"1"`                                                             // Example ID
+	ID      uint   `json:"id" example:"0"`                                                             // Example ID
 	Type    int32  `json:"type,omitempty" enums:"1,2" example:"1"`                                     // 1 chat completion 2 img
 	Name    string `json:"name,omitempty" example:"商城商品"`                                              // Tab
 	Context string `json:"context,omitempty" example:"{\"content\":\"请问当前时间是几点？\",\"role\":\"user\"}"` // 内容

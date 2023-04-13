@@ -1,5 +1,5 @@
 [AppSetting]
-ConfigFile=""
+ConfigFile="/workspaces/"
 DBFile="/data/gopen.db"
 [ChatGPT]
 ApiToken = ""

@@ -2,7 +2,7 @@ version: '3.9'
 services:
   gopen:
     build: 
-      context: ./golang
+      context: .
       ssh:
         - default
       args:
@@ -11,7 +11,7 @@ services:
       - GO111MODULE=on
       - GOPROXY=${GOPROXY}
     volumes:
-      - ./golang:/workspaces/gopen:cached
+      - .:/workspaces/gopen:cached
       - data:/data
     privileged: true
     networks:
@@ -19,7 +19,7 @@ services:
       
   gopen-init:
     build: 
-      context: ./golang
+      context: .
       target: init
       ssh:
         - default
@@ -30,7 +30,7 @@ services:
       - GOPROXY=${GOPROXY}
     volumes:
       - data:/data
-      - ./init/init.sh:/tmp/init.sh:ro
+      - .dockerenv/init/init.sh:/tmp/init.sh:ro
     # command: "sleep infinity"
     entrypoint: "/tmp/init.sh"
     privileged: true
@@ -46,6 +46,7 @@ services:
       - UID=1000
       - GID=1000
     privileged: true
+    # command: "chmod abc:abc /data"
     volumes:
       - data:/app
     restart: unless-stopped
@@ -57,7 +58,7 @@ services:
   proxy:
     image: nginx
     volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./.dockerenv/nginx/default.conf:/etc/nginx/conf.d/default.conf
     ports:
       - "7211:7211"
     networks:
