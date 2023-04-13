@@ -8,6 +8,11 @@ type App struct {
 	Name string `json:"name,omitempty" example:"商城商品"`
 }
 
+type App_S struct {
+	Name  string `json:"name,omitempty"`
+	Attrs []Attr `json:"attrs,omitempty"`
+}
+
 type Attr struct {
 	ID      uint   `json:"id" example:"0"`                                                             // Example ID
 	Type    int32  `json:"type,omitempty" enums:"1,2" example:"1"`                                     // 1 chat completion 2 img

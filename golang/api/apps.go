@@ -59,7 +59,7 @@ func (ctrl *AppController) GetApps(c *gin.Context) {
 // @Tags App
 // @Produce json
 // @Param id path int true "App ID"
-// @Success 200 {object} App
+// @Success 200 {object} App_S
 // @Failure 400 {object} common.ErrorResponse
 // @Failure 404 {object} common.ErrorResponse
 // @Failure 500 {object} common.ErrorResponse
@@ -100,20 +100,20 @@ func (ctrl *AppController) GetApp(c *gin.Context) {
 		return
 	}
 
-	// // Query the app by ID
-	// attrDB := ctrl.Query.Attr
-	// attrs, err := attrDB.Where(attrDB.AppID.Eq(int32(id))).Find()
-	// if err != nil {
-	// 	if !errors.Is(err, gorm.ErrRecordNotFound) {
-	// 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-	// 			"error": err.Error(),
-	// 		})
-	// 	}
-	// 	return
-	// }
-	// for _, v := range attrs {
-	// 	app.Attrs = append(app.Attrs, *v)
-	// }
+	// Query the app by ID
+	attrDB := ctrl.Query.Attr
+	attrs, err := attrDB.Where(attrDB.AppID.Eq(int32(id))).Find()
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+		}
+		return
+	}
+	for _, v := range attrs {
+		app.Attrs = append(app.Attrs, *v)
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"app": app,
