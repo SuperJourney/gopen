@@ -671,6 +671,9 @@ const docTemplate = `{
                 "produces": [
                     "image/jpeg"
                 ],
+                "tags": [
+                    "SD"
+                ],
                 "summary": "图片转换",
                 "parameters": [
                     {
@@ -848,6 +851,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "prompt": {
+                    "type": "string"
+                },
+                "userMessage": {
+                    "description": "用户输入",
                     "type": "string"
                 }
             }

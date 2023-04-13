@@ -63,6 +63,9 @@ definitions:
         type: string
       prompt:
         type: string
+      userMessage:
+        description: 用户输入
+        type: string
     type: object
   api.UserMessage:
     properties:
@@ -550,6 +553,8 @@ paths:
           schema:
             $ref: '#/definitions/common.ErrorResponse'
       summary: 图片转换
+      tags:
+      - SD
   /v1/sd/{attr_id}/txt2img:
     post:
       consumes:
