@@ -109,8 +109,8 @@ func (ctrl *AttrController) GetAttr(c *gin.Context) {
 	})
 }
 
-// @Summary 通用Attr创建
-// @Description 用户通用属性创建，如果是文字和图片场景，请参考 对话Attr创建 和 图片Attr创建
+// @Summary 通用Attr创建 (1 Chat 2 Edit )
+// @Description 用户通用属性创建 类型为chat请使用  CreateChatAttr
 // @Tags Attr
 // @Accept json
 // @Produce json
@@ -147,6 +147,11 @@ func (ctrl *AttrController) CreateAttr(c *gin.Context) {
 	// Validate app data
 	if attr.Type == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Attr type is required"})
+		return
+	}
+
+	if attr.Type == 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "chat 请使用  CreateChatAttr"})
 		return
 	}
 

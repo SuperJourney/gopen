@@ -73,7 +73,7 @@ func (ctrl *SDController) TextToImg(c *gin.Context) {
 			Content: message,
 		})
 		// 当 UserMessage 不为空，将获取 attr 属性翻译出结果
-		resp, err := GetClient().CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+		resp, err := infra.GetClient().CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
 			Model:    openai.GPT3Dot5Turbo,
 			Messages: messages,
 		})

@@ -178,15 +178,6 @@ const docTemplate = `{
                         "name": "attrID",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "Updated attribute information",
-                        "name": "updatedAttr",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/api.Attr"
-                        }
                     }
                 ],
                 "responses": {
@@ -293,7 +284,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "用户通用属性创建，如果是文字和图片场景，请参考 对话Attr创建 和 图片Attr创建",
+                "description": "用户通用属性创建 类型为chat请使用  CreateChatAttr",
                 "consumes": [
                     "application/json"
                 ],
@@ -303,7 +294,7 @@ const docTemplate = `{
                 "tags": [
                     "Attr"
                 ],
-                "summary": "通用Attr创建",
+                "summary": "通用Attr创建 (1 Chat 2 Edit )",
                 "parameters": [
                     {
                         "type": "integer",
@@ -534,7 +525,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.App"
+                            "$ref": "#/definitions/api.App_S"
                         }
                     },
                     "400": {
@@ -772,13 +763,27 @@ const docTemplate = `{
                 }
             }
         },
+        "api.App_S": {
+            "type": "object",
+            "properties": {
+                "attrs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.Attr"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "api.Attr": {
             "type": "object",
             "properties": {
                 "context": {
                     "description": "内容",
                     "type": "string",
-                    "example": "{\"content\":\"请问当前时间是几点？\",\"role\":\"user\"}"
+                    "example": "按照stable diffusion的关键字要求，给出主题鲜明的prompt,并使用英文文回答"
                 },
                 "id": {
                     "description": "Example ID",

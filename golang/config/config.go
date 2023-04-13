@@ -23,6 +23,7 @@ type ChatGPT struct {
 	MaxTokens   int32  `desc:"The maximum number of tokens to generate for each response"`
 	Model       string `desc:"The name or path of the GPT model to use"`
 	Temperature float32
+	BaseURL     string
 }
 
 func LoadConfig() *Setting {

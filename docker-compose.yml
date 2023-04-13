@@ -39,7 +39,7 @@ services:
 
 
   sqlitebrowser:
-    image: lscr.io/linuxserver/sqlitebrowser:latest
+    image: linuxserver/sqlitebrowser:latest
     ports:
       - 3000:3000
     environment:

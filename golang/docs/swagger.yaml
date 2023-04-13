@@ -6,11 +6,20 @@ definitions:
         example: 商城商品
         type: string
     type: object
+  api.App_S:
+    properties:
+      attrs:
+        items:
+          $ref: '#/definitions/api.Attr'
+        type: array
+      name:
+        type: string
+    type: object
   api.Attr:
     properties:
       context:
         description: 内容
-        example: '{"content":"请问当前时间是几点？","role":"user"}'
+        example: 按照stable diffusion的关键字要求，给出主题鲜明的prompt,并使用英文文回答
         type: string
       id:
         description: Example ID
@@ -194,7 +203,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 用户通用属性创建，如果是文字和图片场景，请参考 对话Attr创建 和 图片Attr创建
+      description: 用户通用属性创建 类型为chat请使用  CreateChatAttr
       parameters:
       - description: App ID
         in: path
@@ -222,7 +231,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/common.ErrorResponse'
-      summary: 通用Attr创建
+      summary: 通用Attr创建 (1 Chat 2 Edit )
       tags:
       - Attr
   /v1/apps/{app_id}/attrs/{attr_id}:
@@ -355,12 +364,6 @@ paths:
         name: attrID
         required: true
         type: integer
-      - description: Updated attribute information
-        in: body
-        name: updatedAttr
-        required: true
-        schema:
-          $ref: '#/definitions/api.Attr'
       produces:
       - application/json
       responses:
@@ -436,7 +439,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.App'
+            $ref: '#/definitions/api.App_S'
         "400":
           description: Bad Request
           schema:
