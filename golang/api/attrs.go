@@ -269,7 +269,6 @@ func (ctrl *AttrController) UpdateAttr(c *gin.Context) {
 	db := ctrl.Query.Attr
 	existingAttr, err := db.Where(db.ID.Eq(uint(attrId))).Where(db.AppID.Eq(int32(appID))).First()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		common.Error(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -311,7 +310,6 @@ func (ctrl *AttrController) UpdateChatAttr(c *gin.Context) {
 	db := ctrl.Query.Attr
 	existingAttr, err := db.Where(db.ID.Eq(uint(attrId))).Where(db.AppID.Eq(int32(appID))).First()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		common.Error(c, http.StatusInternalServerError, err)
 		return
 	}
@@ -351,7 +349,6 @@ func (ctrl *AttrController) UpdateChatAttr(c *gin.Context) {
 // @Produce json
 // @Param appID path int true "App ID" format(int32)
 // @Param attrID path int true "Attribute ID" format(int32)
-// @Param updatedAttr body Attr true "Updated attribute information"
 // @Success 200 {object} common.SuccResponse "Success"
 // @Failure 400 {object} common.ErrorResponse "Bad Request"
 // @Failure 500 {object} common.ErrorResponse "Internal Server Error"
@@ -367,17 +364,9 @@ func (ctrl *AttrController) DeleteAttr(c *gin.Context) {
 		return
 	}
 
-	var updatedAttr *model.Attr
-	err := c.ShouldBindJSON(&updatedAttr)
-	if err != nil {
-		common.Error(c, http.StatusBadRequest, err)
-		return
-	}
-
 	db := ctrl.Query.Attr
 	existingAttr, err := db.Where(db.ID.Eq(uint(attrId))).Where(db.AppID.Eq(int32(appID))).First()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		common.Error(c, http.StatusInternalServerError, err)
 		return
 	}
