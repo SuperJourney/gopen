@@ -662,35 +662,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/prompt/{id}": {
-            "get": {
-                "description": "Retrieves a prompt by ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "v1"
-                ],
-                "summary": "Retrieve a prompt by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Prompt ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "schema": {
-                            "$ref": "#/definitions/api.Prompt"
-                        }
-                    }
-                }
-            }
-        },
         "/v1/sd/{attr_id}/img2img": {
             "post": {
                 "description": "将一张图片文件上传并转换成另一张图片",
@@ -786,35 +757,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/v2/prompt/{id}": {
-            "get": {
-                "description": "Retrieves a prompt by ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "v2"
-                ],
-                "summary": "Retrieve a prompt by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Prompt ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "schema": {
-                            "$ref": "#/definitions/api.Prompt"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -895,17 +837,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "context": {
-                    "type": "string"
-                }
-            }
-        },
-        "api.Prompt": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "text": {
                     "type": "string"
                 }
             }

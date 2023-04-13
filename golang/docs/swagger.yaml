@@ -57,13 +57,6 @@ definitions:
       context:
         type: string
     type: object
-  api.Prompt:
-    properties:
-      id:
-        type: string
-      text:
-        type: string
-    type: object
   api.TextToImgMessage:
     properties:
       negative_prompt:
@@ -525,25 +518,6 @@ paths:
       summary: Generate Chat Completion
       tags:
       - ChatGpt
-  /v1/prompt/{id}:
-    get:
-      description: Retrieves a prompt by ID
-      parameters:
-      - description: Prompt ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successful operation
-          schema:
-            $ref: '#/definitions/api.Prompt'
-      summary: Retrieve a prompt by ID
-      tags:
-      - v1
   /v1/sd/{attr_id}/img2img:
     post:
       consumes:
@@ -608,23 +582,4 @@ paths:
       summary: 文本转图片
       tags:
       - SD
-  /v2/prompt/{id}:
-    get:
-      description: Retrieves a prompt by ID
-      parameters:
-      - description: Prompt ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successful operation
-          schema:
-            $ref: '#/definitions/api.Prompt'
-      summary: Retrieve a prompt by ID
-      tags:
-      - v2
 swagger: "2.0"
