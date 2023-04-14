@@ -9,6 +9,11 @@ type App struct {
 	Name string `json:"name,omitempty" example:"商城商品"`
 }
 
+type UploadUrlResponse struct {
+	Code int32  `json:"code"`
+	Data string `json:"data"`
+}
+
 type App_S struct {
 	Name  string `json:"name,omitempty"`
 	Attrs []Attr `json:"attrs,omitempty"`

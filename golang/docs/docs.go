@@ -733,6 +733,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/sd/{attr_id}/img2imgurl": {
+            "post": {
+                "description": "将一张图片文件上传并转换成另一张图片",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "image/jpeg"
+                ],
+                "tags": [
+                    "SD"
+                ],
+                "summary": "图片转换",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Attr ID",
+                        "name": "attrID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "待上传的图片文件",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.UploadUrlResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/sd/{attr_id}/txt2img": {
             "post": {
                 "description": "将文本转换为图片",
@@ -770,6 +821,54 @@ const docTemplate = `{
                         "description": "图片文件",
                         "schema": {
                             "type": "file"
+                        }
+                    },
+                    "500": {
+                        "description": "错误信息",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/sd/{attr_id}/txt2imgurl": {
+            "post": {
+                "description": "将文本转换为图片",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "image/jpeg"
+                ],
+                "tags": [
+                    "SD"
+                ],
+                "summary": "文本转图片",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Attr ID",
+                        "name": "attr_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新的应用数据",
+                        "name": "appData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.TextToImgMessage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.UploadUrlResponse"
                         }
                     },
                     "500": {
@@ -894,6 +993,17 @@ const docTemplate = `{
                 },
                 "userMessage": {
                     "description": "用户输入",
+                    "type": "string"
+                }
+            }
+        },
+        "api.UploadUrlResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
                     "type": "string"
                 }
             }

@@ -12,9 +12,10 @@ type Setting struct {
 }
 
 type AppSetting struct {
-	ConfigFile string `desc:"The path to the configuration file to load"`
-	DBFile     string ``
-	SDHOST     string
+	ConfigFile   string `desc:"The path to the configuration file to load"`
+	DBFile       string ``
+	SDHOST       string
+	ImgUploadUrl string
 }
 
 type ChatGPT struct {

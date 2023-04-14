@@ -80,6 +80,13 @@ definitions:
         description: 用户输入
         type: string
     type: object
+  api.UploadUrlResponse:
+    properties:
+      code:
+        type: integer
+      data:
+        type: string
+    type: object
   api.UserMessage:
     properties:
       content:
@@ -581,6 +588,40 @@ paths:
       summary: 图片转换
       tags:
       - SD
+  /v1/sd/{attr_id}/img2imgurl:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 将一张图片文件上传并转换成另一张图片
+      parameters:
+      - description: Attr ID
+        in: path
+        name: attrID
+        required: true
+        type: integer
+      - description: 待上传的图片文件
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - image/jpeg
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.UploadUrlResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: 图片转换
+      tags:
+      - SD
   /v1/sd/{attr_id}/txt2img:
     post:
       consumes:
@@ -606,6 +647,38 @@ paths:
           description: 图片文件
           schema:
             type: file
+        "500":
+          description: 错误信息
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: 文本转图片
+      tags:
+      - SD
+  /v1/sd/{attr_id}/txt2imgurl:
+    post:
+      consumes:
+      - application/json
+      description: 将文本转换为图片
+      parameters:
+      - description: Attr ID
+        format: int32
+        in: path
+        name: attr_id
+        required: true
+        type: integer
+      - description: 更新的应用数据
+        in: body
+        name: appData
+        required: true
+        schema:
+          $ref: '#/definitions/api.TextToImgMessage'
+      produces:
+      - image/jpeg
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.UploadUrlResponse'
         "500":
           description: 错误信息
           schema:

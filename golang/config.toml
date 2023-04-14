@@ -2,6 +2,8 @@
 ConfigFile="/workspaces/"
 DBFile="/data/gopen.db"
 SDHOST="python"
+ImgUploadUrl=""
+
 [ChatGPT]
 ApiToken = ""
 MaxTokens = 10

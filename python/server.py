@@ -20,15 +20,15 @@ def serve_image(path):
 def txt2img():
     prompt = request.form['prompt']
     negative_prompt = request.form['negative_prompt']
-    width = request.form['width'] if request.form['width'] else 512
-    height = request.form['height'] if request.form['height'] else 512
+    # width = request.form['width'] if request.form['width'] else 512
+    # height = request.form['height'] if request.form['height'] else 512
     result1 = api.txt2img(prompt=f"{prompt}",
                           negative_prompt=f"{negative_prompt}",
                           seed=1003,
                           styles=["anime"],
                           cfg_scale=7,
-                          width=width,
-                          height=height,
+                        #   width=width,
+                        #   height=height,
                           )
 
     image_stream = io.BytesIO()
