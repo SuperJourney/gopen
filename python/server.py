@@ -1,6 +1,6 @@
 import io
 from flask import Flask, send_from_directory
-from flask import send_file,request
+from flask import send_file, request
 import webuiapi
 from PIL import Image, ImageDraw
 
@@ -20,11 +20,15 @@ def serve_image(path):
 def txt2img():
     prompt = request.form['prompt']
     negative_prompt = request.form['negative_prompt']
+    width = request.form['width'] if request.form['width'] else 512
+    height = request.form['height'] if request.form['height'] else 512
     result1 = api.txt2img(prompt=f"{prompt}",
                           negative_prompt=f"{negative_prompt}",
                           seed=1003,
                           styles=["anime"],
                           cfg_scale=7,
+                          width=width,
+                          height=height,
                           )
 
     image_stream = io.BytesIO()
@@ -51,7 +55,7 @@ def img2img():
         styles=["anime"],
         cfg_scale=7,
     )
-    
+
     image_stream = io.BytesIO()
     result1.image.save(image_stream, format='JPEG')
     image_stream.seek(0)
@@ -61,8 +65,5 @@ def img2img():
     )
 
 
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',port=5000)
-
-
+    app.run(host='0.0.0.0', port=5000)

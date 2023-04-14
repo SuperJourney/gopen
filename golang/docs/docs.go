@@ -89,6 +89,35 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/apps/attrs": {
+            "get": {
+                "description": "Get all attrs",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Attr"
+                ],
+                "summary": "Get all Attrs",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/api.Attr"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/apps/{appID}/attrs/{attrID}": {
             "put": {
                 "description": "Update an attribute by providing the app ID, attribute ID, and updated attribute information",
@@ -255,7 +284,7 @@ const docTemplate = `{
                 "tags": [
                     "Attr"
                 ],
-                "summary": "Get all Attrs",
+                "summary": "Get  all Attrs by App ID",
                 "parameters": [
                     {
                         "type": "integer",
@@ -785,6 +814,11 @@ const docTemplate = `{
                     "type": "string",
                     "example": "按照stable diffusion的关键字要求，给出主题鲜明的prompt,并使用英文文回答"
                 },
+                "context_type": {
+                    "description": "1 chat 2 edit",
+                    "type": "integer",
+                    "example": 1
+                },
                 "id": {
                     "description": "Example ID",
                     "type": "integer",
@@ -819,12 +853,12 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "name": {
-                    "description": "Tab",
+                    "description": "属性名称",
                     "type": "string",
                     "example": "商城商品"
                 },
                 "type": {
-                    "description": "1 chat completion 2 img",
+                    "description": "1 纯文字 2 img",
                     "type": "integer",
                     "example": 1
                 }

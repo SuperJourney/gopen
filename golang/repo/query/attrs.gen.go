@@ -29,6 +29,7 @@ func newAttr(db *gorm.DB, opts ...gen.DOOption) attr {
 	_attr.ALL = field.NewAsterisk(tableName)
 	_attr.Type = field.NewInt32(tableName, "type")
 	_attr.Name = field.NewString(tableName, "name")
+	_attr.ContextType = field.NewInt32(tableName, "context_type")
 	_attr.Context = field.NewString(tableName, "context")
 	_attr.AppID = field.NewInt32(tableName, "app_id")
 	_attr.ID = field.NewUint(tableName, "id")
@@ -44,15 +45,16 @@ func newAttr(db *gorm.DB, opts ...gen.DOOption) attr {
 type attr struct {
 	attrDo
 
-	ALL       field.Asterisk
-	Type      field.Int32
-	Name      field.String
-	Context   field.String
-	AppID     field.Int32
-	ID        field.Uint
-	CreatedAt field.Time
-	UpdatedAt field.Time
-	DeletedAt field.Field
+	ALL         field.Asterisk
+	Type        field.Int32
+	Name        field.String
+	ContextType field.Int32
+	Context     field.String
+	AppID       field.Int32
+	ID          field.Uint
+	CreatedAt   field.Time
+	UpdatedAt   field.Time
+	DeletedAt   field.Field
 
 	fieldMap map[string]field.Expr
 }
@@ -71,6 +73,7 @@ func (a *attr) updateTableName(table string) *attr {
 	a.ALL = field.NewAsterisk(table)
 	a.Type = field.NewInt32(table, "type")
 	a.Name = field.NewString(table, "name")
+	a.ContextType = field.NewInt32(table, "context_type")
 	a.Context = field.NewString(table, "context")
 	a.AppID = field.NewInt32(table, "app_id")
 	a.ID = field.NewUint(table, "id")
@@ -93,9 +96,10 @@ func (a *attr) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *attr) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 8)
+	a.fieldMap = make(map[string]field.Expr, 9)
 	a.fieldMap["type"] = a.Type
 	a.fieldMap["name"] = a.Name
+	a.fieldMap["context_type"] = a.ContextType
 	a.fieldMap["context"] = a.Context
 	a.fieldMap["app_id"] = a.AppID
 	a.fieldMap["id"] = a.ID

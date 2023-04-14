@@ -62,7 +62,7 @@ func (ctrl *ChatGptController) Request(c *gin.Context) {
 		}
 	}
 
-	switch attrModel.Type {
+	switch attrModel.ContextType {
 	case int32(TYPE_EDITS):
 		Edits(attrModel, c, userMessage.Content)
 	default:

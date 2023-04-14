@@ -21,6 +21,10 @@ definitions:
         description: 内容
         example: 按照stable diffusion的关键字要求，给出主题鲜明的prompt,并使用英文文回答
         type: string
+      context_type:
+        description: 1 chat 2 edit
+        example: 1
+        type: integer
       id:
         description: Example ID
         example: 0
@@ -46,11 +50,11 @@ definitions:
       id:
         type: integer
       name:
-        description: Tab
+        description: 属性名称
         example: 商城商品
         type: string
       type:
-        description: 1 chat completion 2 img
+        description: 1 纯文字 2 img
         example: 1
         type: integer
     type: object
@@ -197,7 +201,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/common.ErrorResponse'
-      summary: Get all Attrs
+      summary: Get  all Attrs by App ID
       tags:
       - Attr
     post:
@@ -489,6 +493,25 @@ paths:
       summary: 更新应用
       tags:
       - App
+  /v1/apps/attrs:
+    get:
+      description: Get all attrs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/api.Attr'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Get all Attrs
+      tags:
+      - Attr
   /v1/gpt/{attrID}/chat-completion:
     post:
       consumes:

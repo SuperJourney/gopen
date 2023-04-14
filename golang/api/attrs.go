@@ -29,6 +29,30 @@ func NewAttrController() *AttrController {
 // @Description Get all attrs
 // @Tags Attr
 // @Produce json
+// @Success 200 {array} Attr
+// @Failure 500 {object} common.ErrorResponse
+// @Router /v1/apps/attrs [get]
+func (ctrl *AttrController) GetAllAttrs(c *gin.Context) {
+	// Query the app by ID
+	attrDB := ctrl.Query.Attr
+	attrs, err := attrDB.Find()
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+		}
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"attrs": attrs,
+	})
+}
+
+// @Summary Get  all Attrs by App ID
+// @Description Get all attrs
+// @Tags Attr
+// @Produce json
 // @Param app_id path int true "App ID"
 // @Success 200 {array} Attr
 // @Failure 500 {object} common.ErrorResponse
@@ -150,7 +174,12 @@ func (ctrl *AttrController) CreateAttr(c *gin.Context) {
 		return
 	}
 
-	if attr.Type == 1 {
+	if attr.ContextType == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Attr ContextType is required"})
+		return
+	}
+
+	if attr.ContextType == 1 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "chat 请使用  CreateChatAttr"})
 		return
 	}
@@ -203,9 +232,10 @@ func (ctrl *AttrController) CreateChatAttr(c *gin.Context) {
 	}
 
 	attr := model.Attr{
-		Type:    chatAttr.Type,
-		Name:    chatAttr.Name,
-		Context: string(context),
+		Type:        chatAttr.Type,
+		Name:        chatAttr.Name,
+		ContextType: int32(TYPE_CHAT),
+		Context:     string(context),
 	}
 
 	attr.AppID = int32(appId)
@@ -219,6 +249,11 @@ func (ctrl *AttrController) CreateChatAttr(c *gin.Context) {
 	// Validate app data
 	if attr.Type == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Attr type is required"})
+		return
+	}
+
+	if attr.ContextType == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Attr ContextType is required"})
 		return
 	}
 
@@ -278,9 +313,13 @@ func (ctrl *AttrController) UpdateAttr(c *gin.Context) {
 		return
 	}
 
+	if existingAttr.ContextType == TYPE_CHAT {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "chat类型属性 请使用  UpdateChatAttr"})
+		return
+	}
+
 	existingAttr.Name = updatedAttr.Name
 	existingAttr.Context = updatedAttr.Context
-	existingAttr.Type = updatedAttr.Type
 
 	db.Save(existingAttr)
 
@@ -425,6 +464,8 @@ func GetAttrID(c *gin.Context) (int, bool) {
 func init() {
 	router := infra.GetApiEngine()
 	attCtrl := NewAttrController()
+
+	router.GET("/apps/attrs/", attCtrl.GetAllAttrs)
 
 	// Attr 相关路由
 	router.GET("/apps/:app_id/attrs/", attCtrl.GetAttrs)

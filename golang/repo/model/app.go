@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/sashabaranov/go-openai"
 	"gorm.io/gorm"
 )
 
@@ -16,66 +15,18 @@ type App struct {
 }
 
 type Attr struct {
-	Type    int32  `json:"type,omitempty"`    // 1 chat completion 2 img
-	Name    string `json:"name,omitempty"`    // Tab
-	Context string `json:"context,omitempty"` // 内容
-	AppID   int32  `json:"app_id,omitempty"`
+	Type        int32  `json:"type,omitempty"`                     // 1 chat completion 2 img
+	Name        string `json:"name,omitempty"`                     // Tab
+	ContextType int32  `json:"context_type,omitempty" example:"1"` // 1 chat 2 edit
+	Context     string `json:"context,omitempty"`                  // 内容
+	AppID       int32  `json:"app_id,omitempty"`
 	gorm.Model
-}
-
-var contextChat = []openai.ChatCompletionMessage{
-	{
-		Role:    openai.ChatMessageRoleSystem,
-		Content: "你是一个商品设计小组手,根据用户少量的提示词就可以给出极具创造力，吸引力的标题",
-	},
-	{
-		Role:    openai.ChatMessageRoleUser,
-		Content: "口红，女性， 颜色",
-	},
-	{
-		Role:    openai.ChatMessageRoleAssistant,
-		Content: "最时尚的口红色彩",
-	},
-	{
-		Role:    openai.ChatMessageRoleUser,
-		Content: "球鞋，跳高，特步",
-	},
 }
 
 type Img struct {
 	Prompt         string `json:"prompt,omitempty"`
 	NegativePrompt string `json:"negative_prompt,omitempty"`
 }
-
-// type Prompt struct {
-// 	ID     string `json:"id"`
-// 	Type   int32  //
-// 	Scenes string
-// 	Format int32    //查找是不是又 {} 占位符，否者直接放在最后面  == 0 特殊，不使用任何prompt
-// 	Prompt []string `json:"text"`
-// 	// Input  string
-// }
-
-// type Format struct {
-// 	ID      int32
-// 	Name    string // 根据
-// 	Context string //请根据相关提示进行联想，$1  给出指定 $2 ， $2 长度 $3 个字，不要包含除了 $2 的其他内容 {}
-// 	Example string
-// }
-
-// // 场景值 ， 图片风格，等
-// type Scene struct {
-// 	ID    int32
-// 	Scene string
-// }
-
-// 输入：
-// tempalte : “请根据相关提示进行联想，$0  给出指定$1 ， $1 长度 $2 个字，不要包含除了 $1 的其他内容 ”,
-// context: [ "标题"，“4-10”]
-// input: "口红"
-
-// 输出： “请根据相关提示进行联想，口红  给出指定标题 ， 标题 长度 4-10 个字，不要包含除了 标题的其他内容”
-// 请用golang函数实现
 
 func Replace() {
 
