@@ -193,7 +193,7 @@ func (ctrl *AttrController) CreateAttr(c *gin.Context) {
 	db := ctrl.Query.Attr
 	// Save app data to database
 	if err := db.Create(&attr); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save app data"})
+		common.Error(c, http.StatusInternalServerError, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
@@ -266,7 +266,7 @@ func (ctrl *AttrController) CreateChatAttr(c *gin.Context) {
 	db := ctrl.Query.Attr
 	// Save app data to database
 	if err := db.Create(&attr); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save app data"})
+		common.Error(c, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -376,7 +376,7 @@ func (ctrl *AttrController) UpdateChatAttr(c *gin.Context) {
 
 	// Save app data to database
 	if err := db.Save(existingAttr); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save app data"})
+		common.Error(c, http.StatusInternalServerError, err)
 		return
 	}
 

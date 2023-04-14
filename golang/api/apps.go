@@ -150,7 +150,7 @@ func (ctrl *AppController) CreateApp(c *gin.Context) {
 	db := ctrl.Query.App
 	// Save app data to database
 	if err := db.Create(&app); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save app data"})
+		common.Error(c, http.StatusInternalServerError, err)
 		return
 	}
 
