@@ -18,17 +18,21 @@ def serve_image(path):
 
 @app.route('/txt2img', methods=['POST'])
 def txt2img():
+    try:
+        width = request.form['width']
+        height = request.form['height']
+    except:
+        width = 512
+        height = 512
     prompt = request.form['prompt']
     negative_prompt = request.form['negative_prompt']
-    # width = request.form['width'] if request.form['width'] else 512
-    # height = request.form['height'] if request.form['height'] else 512
     result1 = api.txt2img(prompt=f"{prompt}",
                           negative_prompt=f"{negative_prompt}",
                           seed=1003,
                           styles=["anime"],
                           cfg_scale=7,
-                        #   width=width,
-                        #   height=height,
+                          width=width,
+                          height=height,
                           )
 
     image_stream = io.BytesIO()
@@ -42,11 +46,15 @@ def txt2img():
 
 @app.route('/img2img', methods=['POST'])
 def img2img():
+    try:
+        width = request.form['width']
+        height = request.form['height']
+    except:
+        width = 512
+        height = 512
     file = request.files['file']
     image = Image.open(file)
-    # prompt = request.form['prompt']
-    prompt = "blue"
-    # negative_prompt = request.form['negative_prompt']
+    prompt = request.form['prompt']
     result1 = api.img2img(
         images=[image],  # Pass the image as a list
         prompt=prompt,
@@ -54,6 +62,8 @@ def img2img():
         seed=1003,
         styles=["anime"],
         cfg_scale=7,
+        width=width,
+        height=height,
     )
 
     image_stream = io.BytesIO()

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -30,13 +31,15 @@ func NewSDController() *SDController {
 }
 
 type TextToImgMessage struct {
-	UserMessage string // 用户输入
-	SDParam
+	UserMessage string `json:"user_message,omitempty"` // 用户输入
+	SDParam     `json:"sd_param,omitempty"`
 }
 
 type SDParam struct {
 	Prompt         string `json:"prompt,omitempty"`
 	NegativePrompt string `json:"negative_prompt,omitempty"`
+	Witdh          int32  `json:"witdh,omitempty"`
+	Height         int32  `json:"height,omitempty"`
 }
 
 // TextToImg swagger接口文档
@@ -54,8 +57,11 @@ func (ctrl *SDController) TextToImg(c *gin.Context) {
 
 	// 当 UserMessage 不为空，将获取 attr 属性翻译出结果
 	// 读取图片文件内容到内存中
-	imageData, shouldReturn := ctrl.textToImg(c)
-	if shouldReturn {
+	imageData, err := ctrl.textToImg(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
@@ -81,8 +87,11 @@ func (ctrl *SDController) TextToImgUrl(c *gin.Context) {
 
 	// 当 UserMessage 不为空，将获取 attr 属性翻译出结果
 	// 读取图片文件内容到内存中
-	imageData, shouldReturn := ctrl.textToImg(c)
-	if shouldReturn {
+	imageData, err := ctrl.textToImg(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 	ctrl.toImageUrl(c, imageData)
@@ -158,12 +167,7 @@ func (*SDController) toImageUrl(c *gin.Context, imageData []byte) bool {
 	return false
 }
 
-type UploadUrlResponse struct {
-	Code int32  `json:"code"`
-	Data string `json:"data"`
-}
-
-func (*SDController) textToImg(c *gin.Context) ([]byte, bool) {
+func (*SDController) textToImg(c *gin.Context) ([]byte, error) {
 	var param map[string]string = make(map[string]string)
 
 	var x TextToImgMessage
@@ -171,7 +175,7 @@ func (*SDController) textToImg(c *gin.Context) ([]byte, bool) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
-		return nil, true
+		return nil, err
 	}
 
 	if x.UserMessage != "" {
@@ -194,13 +198,15 @@ func (*SDController) textToImg(c *gin.Context) ([]byte, bool) {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
-			return nil, true
+			return nil, err
 		}
 		x.Prompt = x.Prompt + resp.Choices[0].Message.Content
 	}
 
 	param[ParamPrompt] = x.Prompt
 	param[ParamNegativePrompt] = x.NegativePrompt
+	param[ParamHeight] = strconv.Itoa(int(x.Height))
+	param[ParamWidth] = strconv.Itoa(int(x.Witdh))
 
 	var resp *http.Response
 	resp, err := Request_Text2Img(param)
@@ -208,18 +214,23 @@ func (*SDController) textToImg(c *gin.Context) ([]byte, bool) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
-		return nil, true
+		return nil, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println("Failed to send request:", err)
+		return nil, errors.New("textToImg server error")
+	}
 
 	imageData, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
-		return nil, true
+		return nil, err
 	}
-	return imageData, false
+	return imageData, nil
 }
 
 var ImgUrl = func() string {
@@ -232,15 +243,24 @@ var ImgUrl = func() string {
 // @Description 将一张图片文件上传并转换成另一张图片
 // @Accept multipart/form-data
 // @Produce jpeg
-// @Param attrID path int true "Attr ID"
+// @Param attr_id path int true "Attr ID"
 // @Param image formData file true "待上传的图片文件"
+// @Param use_message formData string true "用户提交内容"
+// @Param width formData int false "生成图片宽度"
+// @Param height formData int flase "生成图片高度"
+// @Param prompt formData string flase "prompt"
+// @Param negative_prompt formData string flase "negative_prompt"
 // @Success 200 {file} jpeg "图片文件"
 // @Failure 400 {object} common.ErrorResponse
 // @Failure 500 {object} common.ErrorResponse
 // @Router /v1/sd/{attr_id}/img2img [post]
 func (ctrl *SDController) ImgToImg(c *gin.Context) {
-	imageData, shouldReturn := ctrl.imgToImg(c)
-	if shouldReturn {
+
+	imageData, err := ctrl.imgToImg(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
@@ -252,24 +272,56 @@ func (ctrl *SDController) ImgToImg(c *gin.Context) {
 	c.Writer.Write(imageData)
 }
 
-func (*SDController) imgToImg(c *gin.Context) ([]byte, bool) {
+func (*SDController) imgToImg(c *gin.Context) ([]byte, error) {
 	file, err := c.FormFile("image")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
-		return nil, true
+		return nil, err
+	}
+	usermessage := c.PostForm("user_message")
+	var prompt = c.PostForm("prompt")
+	if usermessage != "" {
+		var messages []openai.ChatCompletionMessage
+		message := fmt.Sprintf(`
+		"%s"
+		###
+		你是一个prompt工程师，请根据以上内容生成格式为 英文描述，图片风格随机
+		`, usermessage)
+		messages = append(messages, openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleUser,
+			Content: message,
+		})
+
+		resp, err := infra.GetClient().CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+			Model:    openai.GPT3Dot5Turbo,
+			Messages: messages,
+		})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			return nil, err
+		}
+		prompt = prompt + resp.Choices[0].Message.Content
 	}
 
 	fileBuf := &bytes.Buffer{}
 	fileWriter := multipart.NewWriter(fileBuf)
+
+	var param map[string]string = make(map[string]string)
+	param[ParamHeight] = c.PostForm("height")
+	param[ParamWidth] = c.PostForm("width")
+	param[ParamPrompt] = prompt
+	WriterAddParam(param, fileWriter)
 
 	fileField, err := fileWriter.CreateFormFile("file", "image.jpg")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
-		return nil, true
+		return nil, err
 	}
 
 	srcFile, err := file.Open()
@@ -277,7 +329,7 @@ func (*SDController) imgToImg(c *gin.Context) ([]byte, bool) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
-		return nil, true
+		return nil, err
 	}
 	defer srcFile.Close()
 
@@ -286,7 +338,7 @@ func (*SDController) imgToImg(c *gin.Context) ([]byte, bool) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
-		return nil, true
+		return nil, err
 	}
 
 	fileWriter.Close()
@@ -298,7 +350,7 @@ func (*SDController) imgToImg(c *gin.Context) ([]byte, bool) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
-		return nil, true
+		return nil, err
 	}
 
 	client := &http.Client{}
@@ -310,7 +362,7 @@ func (*SDController) imgToImg(c *gin.Context) ([]byte, bool) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
-		return nil, true
+		return nil, err
 	}
 	defer resp.Body.Close()
 
@@ -319,9 +371,9 @@ func (*SDController) imgToImg(c *gin.Context) ([]byte, bool) {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
-		return nil, true
+		return nil, err
 	}
-	return imageData, false
+	return imageData, nil
 }
 
 // ImgToImg 函数处理将一张图片文件上传并转换成另一张图片的请求。
@@ -332,13 +384,19 @@ func (*SDController) imgToImg(c *gin.Context) ([]byte, bool) {
 // @Produce jpeg
 // @Param attrID path int true "Attr ID"
 // @Param image formData file true "待上传的图片文件"
+// @Param use_message formData string true "用户提交内容"
+// @Param width formData int false "生成图片宽度"
+// @Param height formData int flase "生成图片高度"
 // @Success 200 {object} UploadUrlResponse
 // @Failure 400 {object} common.ErrorResponse
 // @Failure 500 {object} common.ErrorResponse
 // @Router /v1/sd/{attr_id}/img2imgurl [post]
 func (ctrl *SDController) ImgToImgUrl(c *gin.Context) {
-	imageData, shouldReturn := ctrl.imgToImg(c)
-	if shouldReturn {
+	imageData, err := ctrl.imgToImg(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 	ctrl.toImageUrl(c, imageData)
@@ -346,21 +404,20 @@ func (ctrl *SDController) ImgToImgUrl(c *gin.Context) {
 
 const ParamPrompt string = "prompt"
 const ParamNegativePrompt string = "negative_prompt"
+const ParamWidth = "width"
+const ParamHeight = "height"
 
 // 需要手动关闭连接
 func Request_Text2Img(param map[string]string) (*http.Response, error) {
-	// 设置待发送的 prompt 和 negative_prompt 参数
-	prompt := param[ParamPrompt]
-	negativePrompt := param[ParamNegativePrompt]
 
 	// 创建一个 buffer 用于构建请求体
 	body := new(bytes.Buffer)
 	writer := multipart.NewWriter(body)
 
+	// 设置待发送的 prompt 和 negative_prompt 参数
 	// 添加 prompt 参数到请求体
-	_ = writer.WriteField("prompt", prompt)
 	// 添加 negative_prompt 参数到请求体
-	_ = writer.WriteField("negative_prompt", negativePrompt)
+	WriterAddParam(param, writer)
 
 	// 关闭请求体写入
 	writer.Close()
@@ -383,7 +440,35 @@ func Request_Text2Img(param map[string]string) (*http.Response, error) {
 		fmt.Println("Failed to send request:", err)
 		return nil, err
 	}
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println("Failed to send request:", err)
+		return nil, errors.New("txt2img server error")
+	}
+
 	return resp, nil
+}
+
+func WriterAddParam(param map[string]string, writer *multipart.Writer) {
+	if prompt, ok := param[ParamPrompt]; ok {
+		_ = writer.WriteField("prompt", prompt)
+	}
+
+	if negativePrompt, ok := param[ParamNegativePrompt]; ok {
+		_ = writer.WriteField("negative_prompt", negativePrompt)
+	}
+
+	if width, ok := param[ParamWidth]; ok {
+		if width != "" {
+			_ = writer.WriteField("width", width)
+		}
+
+	}
+	if height, ok := param[ParamHeight]; ok {
+		if height != "" {
+			_ = writer.WriteField("height", height)
+		}
+	}
+
 }
 
 // TextToImg swagger接口文档
@@ -404,9 +489,10 @@ func (ctrl *SDController) TextToImgURL(c *gin.Context) {
 func init() {
 	router := infra.GetApiEngine()
 	chatCtrl := NewSDController()
-	router.POST("/sd/:attr_id/txt2img", chatCtrl.TextToImg)
-	router.POST("/sd/:attr_id/img2img", chatCtrl.ImgToImg)
 
+	router.POST("/sd/:attr_id/txt2img", chatCtrl.TextToImg)
 	router.POST("/sd/:attr_id/txt2imgurl", chatCtrl.TextToImgUrl)
+
+	router.POST("/sd/:attr_id/img2img", chatCtrl.ImgToImg)
 	router.POST("/sd/:attr_id/img2imgurl", chatCtrl.ImgToImgUrl)
 }
