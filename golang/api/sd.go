@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/SuperJourney/gopen/common"
 	"github.com/SuperJourney/gopen/infra"
 	"github.com/SuperJourney/gopen/repo/query"
 	"github.com/gin-gonic/gin"
@@ -272,7 +273,7 @@ func (ctrl *SDController) ImgToImg(c *gin.Context) {
 	c.Writer.Write(imageData)
 }
 
-func (*SDController) imgToImg(c *gin.Context) ([]byte, error) {
+func (ctrl *SDController) imgToImg(c *gin.Context) ([]byte, error) {
 	file, err := c.FormFile("image")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -282,29 +283,60 @@ func (*SDController) imgToImg(c *gin.Context) ([]byte, error) {
 	}
 	usermessage := c.PostForm("user_message")
 	var prompt = c.PostForm("prompt")
-	if usermessage != "" {
-		var messages []openai.ChatCompletionMessage
-		message := fmt.Sprintf(`
-		"%s"
-		###
-		你是一个prompt工程师，请根据以上内容生成格式为 英文描述，图片风格随机
-		`, usermessage)
-		messages = append(messages, openai.ChatCompletionMessage{
-			Role:    openai.ChatMessageRoleUser,
-			Content: message,
-		})
+	attrID, ok := GetAttrID(c)
+	if !ok {
+		common.Error(c, http.StatusBadRequest, errors.New("attr ID 为空"))
+		return nil, err
+	}
+	db := ctrl.Query.Attr
+	attrModel, err := db.Where(db.ID.Eq(uint(attrID))).First()
+	if err != nil {
+		common.Error(c, http.StatusInternalServerError, errors.New("attr ID 为空"))
+		return nil, err
+	}
 
-		resp, err := infra.GetClient().CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
-			Model:    openai.GPT3Dot5Turbo,
-			Messages: messages,
-		})
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err.Error(),
-			})
-			return nil, err
+	if usermessage != "" {
+		var chatprompt string
+		switch attrModel.Type {
+		case TYPE_CHAT:
+			chatprompt, err = ChatCompletion(attrModel.Context, usermessage)
+			if err != nil {
+				return nil, err
+			}
+			// var messages []openai.ChatCompletionMessage
+			// message := fmt.Sprintf(`
+			// "%s"
+			// ###
+			// 你是一个prompt工程师，请根据以上内容生成格式为 英文描述，图片风格随机
+			// `, usermessage)
+			// messages = append(messages, openai.ChatCompletionMessage{
+			// 	Role:    openai.ChatMessageRoleUser,
+			// 	Content: message,
+			// })
+
+			// resp, err := infra.GetClient().CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+			// 	Model:    openai.GPT3Dot5Turbo,
+			// 	Messages: messages,
+			// })
+			// if err != nil {
+			// 	c.JSON(http.StatusInternalServerError, gin.H{
+			// 		"error": err.Error(),
+			// 	})
+			// 	return nil, err
+			// }
+			// prompt = prompt + resp.Choices[0].Message.Content
+		case TYPE_EDITS:
+			chatprompt, err = GptEdits(usermessage, attrModel.Context)
+			if err != nil {
+				return nil, err
+			}
+		default:
+			if err != nil {
+				common.Error(c, http.StatusInternalServerError, errors.New("attr context_type invaild"))
+				return nil, err
+			}
 		}
-		prompt = prompt + resp.Choices[0].Message.Content
+		prompt = prompt + chatprompt
 	}
 
 	fileBuf := &bytes.Buffer{}

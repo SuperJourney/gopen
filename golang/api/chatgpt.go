@@ -1,11 +1,9 @@
 package api
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/SuperJourney/gopen/common"
@@ -71,83 +69,33 @@ func (ctrl *ChatGptController) Request(c *gin.Context) {
 		// Temperature: infra.Setting.ChatGPT.Temperature,
 		// 调用OpenAI生成文本
 		// 将生成的文本以JSON格式返回
-		ChatCompletion(attrModel, c, userMessage.Content)
+		res, err := ChatCompletion(attrModel.Context, userMessage.Content)
+		if err != nil {
+			common.Error(c, http.StatusInternalServerError, err)
+		}
+		c.JSON(http.StatusOK, gin.H{"context": res})
 	}
 
 }
 
 func Edits(attrModel *model.Attr, c *gin.Context, msg string) {
-	// s := openai.GPT3TextDavinci001
-	// req := openai.EditsRequest{
-	// 	Model:       s,
-	// 	Input:       msg,
-	// 	Instruction: attrModel.Context,
-	// }
-
-	// resp, err := infra.GetClient().Edits()
-	// ts(context.Background(), req)
-	// if err != nil {
-	// 	c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	// 	return true
-	// }
-
 	// 请求 URL 和参数
-	payload := fmt.Sprintf(`{
-		"model": "text-davinci-edit-001",
-		"input": "%s",
-		"instruction": "%s"
-	}`, msg, attrModel.Context)
-
 	// 创建 HTTP 请求
-	req, err := http.NewRequest("POST", infra.Setting.BaseURL+"/edits", bytes.NewBuffer([]byte(payload)))
-	if err != nil {
-		fmt.Println("Error creating request:", err)
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	}
-
 	// 设置请求头
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", infra.Setting.ApiToken))
-
 	// 发送请求
-	client := &http.Client{}
-	res, err := client.Do(req)
+	context, err := GptEdits(msg, attrModel.Context)
 	if err != nil {
-		fmt.Println("Error sending request:", err)
-		return
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
-		var errRes openai.ErrorResponse
-		err = json.NewDecoder(res.Body).Decode(&errRes)
-		if err != nil || errRes.Error == nil {
-			reqErr := openai.RequestError{
-				StatusCode: res.StatusCode,
-				Err:        err,
-			}
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": reqErr.Error()})
-
-		}
-		errRes.Error.StatusCode = res.StatusCode
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": errRes.Error.Message})
+		common.Error(c, http.StatusInternalServerError, err)
 	}
 
-	var v *openai.EditsResponse = &openai.EditsResponse{}
-	if err = json.NewDecoder(res.Body).Decode(v); err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	}
-
-	c.JSON(http.StatusOK, gin.H{"context": v.Choices[0].Text})
-
+	c.JSON(http.StatusOK, gin.H{"context": context})
+	return
 }
 
-func ChatCompletion(attrModel *model.Attr, c *gin.Context, msg string) bool {
+func ChatCompletion(preConversion string, msg string) (string, error) {
 	var messages []openai.ChatCompletionMessage
-	if err := json.Unmarshal([]byte(attrModel.Context), &messages); err != nil {
-		common.Info("err:%v", err)
-		common.Error(c, http.StatusInternalServerError, errors.New("attr信息异常"))
-		return true
+	if err := json.Unmarshal([]byte(preConversion), &messages); err != nil {
+		return "", err
 	}
 
 	messages = append(messages, openai.ChatCompletionMessage{
@@ -162,12 +110,9 @@ func ChatCompletion(attrModel *model.Attr, c *gin.Context, msg string) bool {
 
 	resp, err := infra.GetClient().CreateChatCompletion(context.Background(), req)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return true
+		return "", err
 	}
-
-	c.JSON(http.StatusOK, gin.H{"context": resp.Choices[0].Message.Content})
-	return false
+	return resp.Choices[0].Message.Content, nil
 }
 
 func init() {

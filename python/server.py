@@ -18,12 +18,15 @@ def serve_image(path):
 
 @app.route('/txt2img', methods=['POST'])
 def txt2img():
-    try:
-        width = request.form['width']
-        height = request.form['height']
-    except:
+    width = request.form.get('width', 512)
+    height = request.form.get('height', 512)
+
+    # Check if width or height is 0, then set default value to 512
+    if not width.isdigit() or int(width) == 0:
         width = 512
+    if not height.isdigit() or int(height) == 0:
         height = 512
+
     prompt = request.form['prompt']
     negative_prompt = request.form['negative_prompt']
     result1 = api.txt2img(prompt=f"{prompt}",
@@ -46,12 +49,15 @@ def txt2img():
 
 @app.route('/img2img', methods=['POST'])
 def img2img():
-    try:
-        width = request.form['width']
-        height = request.form['height']
-    except:
+    width = request.form.get('width', 512)
+    height = request.form.get('height', 512)
+
+    # Check if width or height is 0, then set default value to 512
+    if not width.isdigit() or int(width) == 0:
         width = 512
+    if not height.isdigit() or int(height) == 0:
         height = 512
+
     file = request.files['file']
     image = Image.open(file)
     prompt = request.form['prompt']

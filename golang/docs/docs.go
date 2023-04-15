@@ -699,7 +699,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Attr ID",
-                        "name": "attrID",
+                        "name": "attr_id",
                         "in": "path",
                         "required": true
                     },
@@ -709,6 +709,25 @@ const docTemplate = `{
                         "name": "image",
                         "in": "formData",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户提交内容",
+                        "name": "use_message",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "生成图片宽度",
+                        "name": "width",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "生成图片高度",
+                        "name": "height",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -760,6 +779,25 @@ const docTemplate = `{
                         "name": "image",
                         "in": "formData",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户提交内容",
+                        "name": "use_message",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "生成图片宽度",
+                        "name": "width",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "生成图片高度",
+                        "name": "height",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -982,16 +1020,30 @@ const docTemplate = `{
                 }
             }
         },
-        "api.TextToImgMessage": {
+        "api.SDParam": {
             "type": "object",
             "properties": {
+                "height": {
+                    "type": "integer"
+                },
                 "negative_prompt": {
                     "type": "string"
                 },
                 "prompt": {
                     "type": "string"
                 },
-                "userMessage": {
+                "witdh": {
+                    "type": "integer"
+                }
+            }
+        },
+        "api.TextToImgMessage": {
+            "type": "object",
+            "properties": {
+                "sd_param": {
+                    "$ref": "#/definitions/api.SDParam"
+                },
+                "user_message": {
                     "description": "用户输入",
                     "type": "string"
                 }

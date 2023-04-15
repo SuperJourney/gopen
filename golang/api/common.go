@@ -1,8 +1,18 @@
 package api
 
-var (
-	TYPE_CHAT  int32 = 1
-	TYPE_EDITS       = 2
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
+
+	"github.com/SuperJourney/gopen/infra"
+	"github.com/sashabaranov/go-openai"
+)
+
+const (
+	TYPE_CHAT int32 = iota + 1
+	TYPE_EDITS
 )
 
 type App struct {
@@ -50,4 +60,50 @@ type ImgMessage struct {
 
 type ChatCompletionResponse struct {
 	Context string
+}
+
+func GptEdits(msg string, instruction string) (string, error) {
+	payload := fmt.Sprintf(`{
+		"model": "text-davinci-edit-001",
+		"input": "%s",
+		"instruction": "%s"
+	}`, msg, instruction)
+
+	req, err := http.NewRequest("POST", infra.Setting.BaseURL+"/edits", bytes.NewBuffer([]byte(payload)))
+	if err != nil {
+		fmt.Println("Error creating request:", err)
+		return "", err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", infra.Setting.ApiToken))
+
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Println("Error sending request:", err)
+		return "", err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
+		var errRes openai.ErrorResponse
+		err = json.NewDecoder(res.Body).Decode(&errRes)
+		if err != nil || errRes.Error == nil {
+			reqErr := openai.RequestError{
+				StatusCode: res.StatusCode,
+				Err:        err,
+			}
+			return "", &reqErr
+
+		}
+		errRes.Error.StatusCode = res.StatusCode
+		return "", errRes.Error
+	}
+
+	var v *openai.EditsResponse = &openai.EditsResponse{}
+	if err = json.NewDecoder(res.Body).Decode(v); err != nil {
+		return "", err
+	}
+	return v.Choices[0].Text, nil
 }
