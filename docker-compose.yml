@@ -14,6 +14,9 @@ services:
       - ./golang:/workspaces/gopen:cached
       - data:/data
     privileged: true
+    depends_on:
+      - python
+      
     networks:
       - app_net
       
