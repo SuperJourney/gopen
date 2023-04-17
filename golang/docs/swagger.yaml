@@ -5,6 +5,8 @@ definitions:
       name:
         example: 商城商品
         type: string
+      ord:
+        type: integer
     type: object
   api.App_S:
     properties:
@@ -33,6 +35,10 @@ definitions:
         description: Tab
         example: 商城商品
         type: string
+      ord:
+        type: integer
+      sd_param:
+        type: string
       type:
         description: 1 chat completion 2 img
         enum:
@@ -53,6 +59,8 @@ definitions:
         description: 属性名称
         example: 商城商品
         type: string
+      ord:
+        type: integer
       type:
         description: 1 纯文字 2 img
         example: 1
@@ -78,7 +86,7 @@ definitions:
         type: string
       prompt:
         type: string
-      witdh:
+      width:
         type: integer
     type: object
   api.TextToImgMessage:
@@ -592,6 +600,14 @@ paths:
         in: formData
         name: height
         type: integer
+      - description: prompt
+        in: formData
+        name: prompt
+        type: string
+      - description: negative_prompt
+        in: formData
+        name: negative_prompt
+        type: string
       produces:
       - image/jpeg
       responses:

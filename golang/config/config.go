@@ -12,10 +12,13 @@ type Setting struct {
 }
 
 type AppSetting struct {
-	ConfigFile   string `desc:"The path to the configuration file to load"`
-	DBFile       string ``
-	SDHOST       string
-	ImgUploadUrl string
+	ConfigFile    string `desc:"The path to the configuration file to load"`
+	DBFile        string ``
+	SDHOST        string
+	ImgUploadUrl  string
+	BaiduTransate bool
+	BaiduAppId    string
+	BaiduApiKey   string
 }
 
 type ChatGPT struct {

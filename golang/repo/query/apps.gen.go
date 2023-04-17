@@ -32,6 +32,7 @@ func newApp(db *gorm.DB, opts ...gen.DOOption) app {
 	_app.CreatedAt = field.NewTime(tableName, "created_at")
 	_app.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_app.DeletedAt = field.NewField(tableName, "deleted_at")
+	_app.Ord = field.NewInt(tableName, "ord")
 	_app.Attrs = appHasManyAttrs{
 		db: db.Session(&gorm.Session{}),
 
@@ -52,6 +53,7 @@ type app struct {
 	CreatedAt field.Time
 	UpdatedAt field.Time
 	DeletedAt field.Field
+	Ord       field.Int
 	Attrs     appHasManyAttrs
 
 	fieldMap map[string]field.Expr
@@ -74,6 +76,7 @@ func (a *app) updateTableName(table string) *app {
 	a.CreatedAt = field.NewTime(table, "created_at")
 	a.UpdatedAt = field.NewTime(table, "updated_at")
 	a.DeletedAt = field.NewField(table, "deleted_at")
+	a.Ord = field.NewInt(table, "ord")
 
 	a.fillFieldMap()
 
@@ -90,12 +93,13 @@ func (a *app) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *app) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 6)
+	a.fieldMap = make(map[string]field.Expr, 7)
 	a.fieldMap["name"] = a.Name
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
 	a.fieldMap["deleted_at"] = a.DeletedAt
+	a.fieldMap["ord"] = a.Ord
 
 }
 

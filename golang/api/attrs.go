@@ -35,7 +35,7 @@ func NewAttrController() *AttrController {
 func (ctrl *AttrController) GetAllAttrs(c *gin.Context) {
 	// Query the app by ID
 	attrDB := ctrl.Query.Attr
-	attrs, err := attrDB.Find()
+	attrs, err := attrDB.Order(attrDB.Ord).Find()
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -79,7 +79,7 @@ func (ctrl *AttrController) GetAttrs(c *gin.Context) {
 
 	// Query the app by ID
 	attrDB := ctrl.Query.Attr
-	attrs, err := attrDB.Where(attrDB.AppID.Eq(int32(appIdIntger))).Debug().Find()
+	attrs, err := attrDB.Where(attrDB.AppID.Eq(int32(appIdIntger))).Order(attrDB.Ord).Find()
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{

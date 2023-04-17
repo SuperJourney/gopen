@@ -17,6 +17,7 @@ const (
 
 type App struct {
 	Name string `json:"name,omitempty" example:"商城商品"`
+	Ord  int    `json:"ord,omitempty"`
 }
 
 type UploadUrlResponse struct {
@@ -35,6 +36,8 @@ type Attr struct {
 	Name        string `json:"name,omitempty" example:"商城商品"`                                               // Tab
 	ContextType int32  `json:"context_type,omitempty" example:"1"`                                          // 1 chat 2 edit
 	Context     string `json:"context,omitempty" example:"按照stable diffusion的关键字要求，给出主题鲜明的prompt,并使用英文文回答"` // 内容
+	SDParam     string `json:"sd_param"`
+	Ord         int    `json:"ord,omitempty"`
 }
 
 type ChatAttr struct {
@@ -42,6 +45,7 @@ type ChatAttr struct {
 	Type    int32                   `json:"type,omitempty" example:"1"`    // 1 纯文字 2 img
 	Name    string                  `json:"name,omitempty" example:"商城商品"` // 属性名称
 	Context []ChatCompletionMessage `json:"context,omitempty"`
+	Ord     int                     `json:"ord,omitempty"`
 }
 
 type UserMessage struct {

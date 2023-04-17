@@ -728,6 +728,18 @@ const docTemplate = `{
                         "description": "生成图片高度",
                         "name": "height",
                         "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "prompt",
+                        "name": "prompt",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "negative_prompt",
+                        "name": "negative_prompt",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -926,6 +938,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "商城商品"
+                },
+                "ord": {
+                    "type": "integer"
                 }
             }
         },
@@ -966,6 +981,12 @@ const docTemplate = `{
                     "type": "string",
                     "example": "商城商品"
                 },
+                "ord": {
+                    "type": "integer"
+                },
+                "sd_param": {
+                    "type": "string"
+                },
                 "type": {
                     "description": "1 chat completion 2 img",
                     "type": "integer",
@@ -993,6 +1014,9 @@ const docTemplate = `{
                     "description": "属性名称",
                     "type": "string",
                     "example": "商城商品"
+                },
+                "ord": {
+                    "type": "integer"
                 },
                 "type": {
                     "description": "1 纯文字 2 img",
@@ -1032,7 +1056,7 @@ const docTemplate = `{
                 "prompt": {
                     "type": "string"
                 },
-                "witdh": {
+                "width": {
                     "type": "integer"
                 }
             }

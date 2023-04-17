@@ -3,4 +3,4 @@ db
 __debug_bin
 python/images/1
 golang/test/main.go
-golang/config.toml.example
+golang/config.toml

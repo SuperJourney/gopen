@@ -44,7 +44,7 @@ func NewAppController() *AppController {
 // @Failure 500 {object} common.ErrorResponse
 // @Router /v1/apps [get]
 func (ctrl *AppController) GetApps(c *gin.Context) {
-	apps, err := ctrl.Query.App.Find()
+	apps, err := ctrl.Query.App.Order(ctrl.Query.App.Ord).Find()
 	if err != nil {
 		common.Error(c, http.StatusInternalServerError, err)
 		return

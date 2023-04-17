@@ -13,7 +13,9 @@ import (
 
 	"github.com/SuperJourney/gopen/common"
 	"github.com/SuperJourney/gopen/infra"
+	"github.com/SuperJourney/gopen/repo/model"
 	"github.com/SuperJourney/gopen/repo/query"
+	"github.com/SuperJourney/gopen/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/sashabaranov/go-openai"
 )
@@ -38,7 +40,7 @@ type TextToImgMessage struct {
 type SDParam struct {
 	Prompt         string `json:"prompt,omitempty"`
 	NegativePrompt string `json:"negative_prompt,omitempty"`
-	Witdh          int32  `json:"witdh,omitempty"`
+	Width          int32  `json:"width,omitempty"`
 	Height         int32  `json:"height,omitempty"`
 }
 
@@ -168,7 +170,6 @@ func (*SDController) toImageUrl(c *gin.Context, imageData []byte) bool {
 }
 
 func (ctrl *SDController) textToImg(c *gin.Context) ([]byte, error) {
-	var param map[string]string = make(map[string]string)
 
 	var x TextToImgMessage
 	if err := c.BindJSON(&x); err != nil {
@@ -177,6 +178,7 @@ func (ctrl *SDController) textToImg(c *gin.Context) ([]byte, error) {
 		})
 		return nil, err
 	}
+
 	var prompt = c.PostForm("prompt")
 	attrID, ok := GetAttrID(c)
 	if !ok {
@@ -189,60 +191,23 @@ func (ctrl *SDController) textToImg(c *gin.Context) ([]byte, error) {
 		return nil, err
 	}
 	usermessage := x.UserMessage
-	if usermessage != "" {
-		var chatprompt string
-		switch attrModel.Type {
-		case TYPE_CHAT:
-			chatprompt, err = ChatCompletion(attrModel.Context, usermessage)
-			if err != nil {
-				return nil, err
-			}
-		case TYPE_EDITS:
-			chatprompt, err = GptEdits(usermessage, attrModel.Context)
-			if err != nil {
-				return nil, err
-			}
-		default:
-			if err != nil {
-				common.Error(c, http.StatusInternalServerError, errors.New("attr context_type invaild"))
-				return nil, err
-			}
-		}
-		prompt = prompt + chatprompt
+
+	prompt, err = zh2en(usermessage, prompt, attrModel, c)
+	if err != nil {
+		return nil, err
 	}
 
-	// if x.UserMessage != "" {
-	// 	var messages []openai.ChatCompletionMessage
-	// 	message := fmt.Sprintf(`
-	// 	"%s"
-	// 	###
-	// 	你是一个prompt工程师，请根据以上内容生成格式为 英文描述，图片风格随机
-	// 	`, x.UserMessage)
-	// 	messages = append(messages, openai.ChatCompletionMessage{
-	// 		Role:    openai.ChatMessageRoleUser,
-	// 		Content: message,
-	// 	})
+	if attrModel.SDParam != "" {
+		var sdparam SDParam
+		if err := json.Unmarshal([]byte(attrModel.SDParam), &sdparam); err == nil {
+			x.SDParam = sdparam
+		}
+	}
 
-	// 	resp, err := infra.GetClient().CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
-	// 		Model:    openai.GPT3Dot5Turbo,
-	// 		Messages: messages,
-	// 	})
-	// 	if err != nil {
-	// 		c.JSON(http.StatusInternalServerError, gin.H{
-	// 			"error": err.Error(),
-	// 		})
-	// 		return nil, err
-	// 	}
-	// 	x.Prompt = x.Prompt + resp.Choices[0].Message.Content
-	// }
-
-	param[ParamPrompt] = x.Prompt
-	param[ParamNegativePrompt] = x.NegativePrompt
-	param[ParamHeight] = strconv.Itoa(int(x.Height))
-	param[ParamWidth] = strconv.Itoa(int(x.Witdh))
+	x.Prompt = prompt
 
 	var resp *http.Response
-	resp, err = Request_Text2Img(param)
+	resp, err = Request_Text2Img(x.SDParam)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -327,36 +292,37 @@ func (ctrl *SDController) imgToImg(c *gin.Context) ([]byte, error) {
 		return nil, err
 	}
 
-	if usermessage != "" {
-		var chatprompt string
-		switch attrModel.Type {
-		case TYPE_CHAT:
-			chatprompt, err = ChatCompletion(attrModel.Context, usermessage)
-			if err != nil {
-				return nil, err
-			}
-		case TYPE_EDITS:
-			chatprompt, err = GptEdits(usermessage, attrModel.Context)
-			if err != nil {
-				return nil, err
-			}
-		default:
-			if err != nil {
-				common.Error(c, http.StatusInternalServerError, errors.New("attr context_type invaild"))
-				return nil, err
-			}
+	var sdParam = SDParam{
+		Prompt:         c.PostForm("prompt"),
+		NegativePrompt: c.PostForm("prompt_negative"),
+	}
+
+	width, err := strconv.ParseInt(c.PostForm("width"), 10, 32)
+	if err == nil {
+		sdParam.Width = int32(width)
+	}
+
+	height, err := strconv.ParseInt(c.PostForm("height"), 10, 32)
+	if err == nil {
+		sdParam.Height = int32(height)
+	}
+
+	if attrModel.SDParam != "" {
+		var sdparamx SDParam
+		if err := json.Unmarshal([]byte(attrModel.SDParam), &sdparamx); err == nil {
+			sdParam = sdparamx
 		}
-		prompt = prompt + chatprompt
+	}
+
+	prompt, err = zh2en(usermessage, prompt, attrModel, c)
+	if err != nil {
+		return nil, err
 	}
 
 	fileBuf := &bytes.Buffer{}
 	fileWriter := multipart.NewWriter(fileBuf)
-
-	var param map[string]string = make(map[string]string)
-	param[ParamHeight] = c.PostForm("height")
-	param[ParamWidth] = c.PostForm("width")
-	param[ParamPrompt] = prompt
-	WriterAddParam(param, fileWriter)
+	sdParam.Prompt = sdParam.Prompt + prompt
+	WriterAddParam(sdParam, fileWriter)
 
 	fileField, err := fileWriter.CreateFormFile("file", "image.jpg")
 	if err != nil {
@@ -418,6 +384,40 @@ func (ctrl *SDController) imgToImg(c *gin.Context) ([]byte, error) {
 	return imageData, nil
 }
 
+func zh2en(usermessage string, prompt string, attrModel *model.Attr, c *gin.Context) (string, error) {
+	var err error
+	if infra.Setting.BaiduTransate {
+		chatprompt, err := utils.Translate(usermessage, "zh", "en")
+		if err != nil {
+			return "", err
+		}
+		prompt = prompt + chatprompt
+	} else {
+		if usermessage != "" {
+			var chatprompt string
+			switch attrModel.ContextType {
+			case TYPE_CHAT:
+				chatprompt, err = ChatCompletion(attrModel.Context, usermessage)
+				if err != nil {
+					return "", err
+				}
+			case TYPE_EDITS:
+				chatprompt, err = GptEdits(usermessage, attrModel.Context)
+				if err != nil {
+					return "", err
+				}
+			default:
+				if err != nil {
+					common.Error(c, http.StatusInternalServerError, errors.New("attr context_type invaild"))
+					return "", err
+				}
+			}
+			prompt = prompt + chatprompt
+		}
+	}
+	return prompt, nil
+}
+
 // ImgToImg 函数处理将一张图片文件上传并转换成另一张图片的请求。
 // @Summary 图片转换
 // @Tags SD
@@ -450,7 +450,7 @@ const ParamWidth = "width"
 const ParamHeight = "height"
 
 // 需要手动关闭连接
-func Request_Text2Img(param map[string]string) (*http.Response, error) {
+func Request_Text2Img(param SDParam) (*http.Response, error) {
 
 	// 创建一个 buffer 用于构建请求体
 	body := new(bytes.Buffer)
@@ -490,7 +490,14 @@ func Request_Text2Img(param map[string]string) (*http.Response, error) {
 	return resp, nil
 }
 
-func WriterAddParam(param map[string]string, writer *multipart.Writer) {
+func WriterAddParam(x SDParam, writer *multipart.Writer) {
+
+	var param map[string]string = make(map[string]string)
+	param[ParamPrompt] = x.Prompt
+	param[ParamNegativePrompt] = x.NegativePrompt
+	param[ParamHeight] = strconv.Itoa(int(x.Height))
+	param[ParamWidth] = strconv.Itoa(int(x.Width))
+
 	if prompt, ok := param[ParamPrompt]; ok {
 		_ = writer.WriteField("prompt", prompt)
 	}
