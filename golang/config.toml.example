@@ -1,8 +1,11 @@
 [AppSetting]
-ConfigFile="/workspaces/"
-DBFile="/data/gopen.db"
-SDHOST="python"
+ConfigFile=""
+DBFile=""
+SDHOST=""
 ImgUploadUrl=""
+BaiduTransate=true
+BaiduAppId=""
+BaiduApiKey=""
 
 [ChatGPT]
 ApiToken = ""
@@ -10,4 +13,4 @@ MaxTokens = 10
 Model = "gpt-3.5-turbo"
 Temperature=0.4
 STEAM=true
-BaseURL = "http://143.42.236.71:8443/v1"
+BaseURL = ""
