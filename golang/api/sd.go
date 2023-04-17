@@ -2,7 +2,6 @@ package api
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -168,7 +167,7 @@ func (*SDController) toImageUrl(c *gin.Context, imageData []byte) bool {
 	return false
 }
 
-func (*SDController) textToImg(c *gin.Context) ([]byte, error) {
+func (ctrl *SDController) textToImg(c *gin.Context) ([]byte, error) {
 	var param map[string]string = make(map[string]string)
 
 	var x TextToImgMessage
@@ -178,31 +177,64 @@ func (*SDController) textToImg(c *gin.Context) ([]byte, error) {
 		})
 		return nil, err
 	}
-
-	if x.UserMessage != "" {
-		var messages []openai.ChatCompletionMessage
-		message := fmt.Sprintf(`
-		"%s"
-		###
-		你是一个prompt工程师，请根据以上内容生成格式为 英文描述，图片风格随机
-		`, x.UserMessage)
-		messages = append(messages, openai.ChatCompletionMessage{
-			Role:    openai.ChatMessageRoleUser,
-			Content: message,
-		})
-
-		resp, err := infra.GetClient().CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
-			Model:    openai.GPT3Dot5Turbo,
-			Messages: messages,
-		})
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err.Error(),
-			})
-			return nil, err
-		}
-		x.Prompt = x.Prompt + resp.Choices[0].Message.Content
+	var prompt = c.PostForm("prompt")
+	attrID, ok := GetAttrID(c)
+	if !ok {
+		return nil, errors.New("attr ID 为空")
 	}
+	db := ctrl.Query.Attr
+	attrModel, err := db.Where(db.ID.Eq(uint(attrID))).First()
+	if err != nil {
+		common.Error(c, http.StatusInternalServerError, errors.New("attr ID 为空"))
+		return nil, err
+	}
+	usermessage := x.UserMessage
+	if usermessage != "" {
+		var chatprompt string
+		switch attrModel.Type {
+		case TYPE_CHAT:
+			chatprompt, err = ChatCompletion(attrModel.Context, usermessage)
+			if err != nil {
+				return nil, err
+			}
+		case TYPE_EDITS:
+			chatprompt, err = GptEdits(usermessage, attrModel.Context)
+			if err != nil {
+				return nil, err
+			}
+		default:
+			if err != nil {
+				common.Error(c, http.StatusInternalServerError, errors.New("attr context_type invaild"))
+				return nil, err
+			}
+		}
+		prompt = prompt + chatprompt
+	}
+
+	// if x.UserMessage != "" {
+	// 	var messages []openai.ChatCompletionMessage
+	// 	message := fmt.Sprintf(`
+	// 	"%s"
+	// 	###
+	// 	你是一个prompt工程师，请根据以上内容生成格式为 英文描述，图片风格随机
+	// 	`, x.UserMessage)
+	// 	messages = append(messages, openai.ChatCompletionMessage{
+	// 		Role:    openai.ChatMessageRoleUser,
+	// 		Content: message,
+	// 	})
+
+	// 	resp, err := infra.GetClient().CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+	// 		Model:    openai.GPT3Dot5Turbo,
+	// 		Messages: messages,
+	// 	})
+	// 	if err != nil {
+	// 		c.JSON(http.StatusInternalServerError, gin.H{
+	// 			"error": err.Error(),
+	// 		})
+	// 		return nil, err
+	// 	}
+	// 	x.Prompt = x.Prompt + resp.Choices[0].Message.Content
+	// }
 
 	param[ParamPrompt] = x.Prompt
 	param[ParamNegativePrompt] = x.NegativePrompt
@@ -210,7 +242,7 @@ func (*SDController) textToImg(c *gin.Context) ([]byte, error) {
 	param[ParamWidth] = strconv.Itoa(int(x.Witdh))
 
 	var resp *http.Response
-	resp, err := Request_Text2Img(param)
+	resp, err = Request_Text2Img(param)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -303,28 +335,6 @@ func (ctrl *SDController) imgToImg(c *gin.Context) ([]byte, error) {
 			if err != nil {
 				return nil, err
 			}
-			// var messages []openai.ChatCompletionMessage
-			// message := fmt.Sprintf(`
-			// "%s"
-			// ###
-			// 你是一个prompt工程师，请根据以上内容生成格式为 英文描述，图片风格随机
-			// `, usermessage)
-			// messages = append(messages, openai.ChatCompletionMessage{
-			// 	Role:    openai.ChatMessageRoleUser,
-			// 	Content: message,
-			// })
-
-			// resp, err := infra.GetClient().CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
-			// 	Model:    openai.GPT3Dot5Turbo,
-			// 	Messages: messages,
-			// })
-			// if err != nil {
-			// 	c.JSON(http.StatusInternalServerError, gin.H{
-			// 		"error": err.Error(),
-			// 	})
-			// 	return nil, err
-			// }
-			// prompt = prompt + resp.Choices[0].Message.Content
 		case TYPE_EDITS:
 			chatprompt, err = GptEdits(usermessage, attrModel.Context)
 			if err != nil {
