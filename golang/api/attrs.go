@@ -323,6 +323,8 @@ func (ctrl *AttrController) UpdateAttr(c *gin.Context) {
 	existingAttr.Context = updatedAttr.Context
 	existingAttr.Ord = updatedAttr.Ord
 	existingAttr.Tips = updatedAttr.Tips
+	existingAttr.Type = updatedAttr.Type
+	existingAttr.SDParam = updatedAttr.SDParam
 
 	db.Save(existingAttr)
 
