@@ -36,8 +36,13 @@ definitions:
         example: 商城商品
         type: string
       ord:
+        example: 1
         type: integer
       sd_param:
+        example: '{"width":512,"height":512}'
+        type: string
+      tips:
+        example: 为了获得更优的反馈，请描述商品名称与商品特性，如'YSL/圣罗兰 416； 红黑管唇釉，易上色，湿润'
         type: string
       type:
         description: 1 chat completion 2 img
@@ -61,6 +66,9 @@ definitions:
         type: string
       ord:
         type: integer
+      tips:
+        example: 为了获得更优的反馈，请描述商品名称与商品特性，如'YSL/圣罗兰 416； 红黑管唇釉，易上色，湿润'
+        type: string
       type:
         description: 1 纯文字 2 img
         example: 1
@@ -69,8 +77,10 @@ definitions:
   api.ChatCompletionMessage:
     properties:
       content:
+        example: 请问今天是几号?
         type: string
       role:
+        example: user
         type: string
     type: object
   api.ChatCompletionResponse:

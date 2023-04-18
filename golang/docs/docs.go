@@ -982,10 +982,16 @@ const docTemplate = `{
                     "example": "商城商品"
                 },
                 "ord": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                 },
                 "sd_param": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "{\"width\":512,\"height\":512}"
+                },
+                "tips": {
+                    "type": "string",
+                    "example": "为了获得更优的反馈，请描述商品名称与商品特性，如'YSL/圣罗兰 416； 红黑管唇釉，易上色，湿润'"
                 },
                 "type": {
                     "description": "1 chat completion 2 img",
@@ -1018,6 +1024,10 @@ const docTemplate = `{
                 "ord": {
                     "type": "integer"
                 },
+                "tips": {
+                    "type": "string",
+                    "example": "为了获得更优的反馈，请描述商品名称与商品特性，如'YSL/圣罗兰 416； 红黑管唇釉，易上色，湿润'"
+                },
                 "type": {
                     "description": "1 纯文字 2 img",
                     "type": "integer",
@@ -1029,10 +1039,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "content": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "请问今天是几号?"
                 },
                 "role": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user"
                 }
             }
         },

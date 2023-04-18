@@ -11,8 +11,9 @@ import (
 type App struct {
 	Name  string `json:"name,omitempty"`
 	Attrs []Attr `json:"attrs,omitempty"`
+	Tips  string `json:"tips"`
+	Ord   int    `json:"ord,omitempty"`
 	gorm.Model
-	Ord int `json:"ord,omitempty"`
 }
 
 type Attr struct {
@@ -22,8 +23,9 @@ type Attr struct {
 	Context     string `json:"context,omitempty"`                  // 内容
 	AppID       int32  `json:"app_id,omitempty"`
 	SDParam     string `json:"sd_param"`
+	Tips        string `json:"tips"`
+	Ord         int    `json:"ord,omitempty"`
 	gorm.Model
-	Ord int `json:"ord,omitempty"`
 }
 
 type Img struct {
