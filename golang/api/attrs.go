@@ -313,10 +313,10 @@ func (ctrl *AttrController) UpdateAttr(c *gin.Context) {
 		return
 	}
 
-	if existingAttr.ContextType == TYPE_CHAT {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "chat类型属性 请使用  UpdateChatAttr"})
-		return
-	}
+	// if existingAttr.ContextType == TYPE_CHAT {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "chat类型属性 请使用  UpdateChatAttr"})
+	// 	return
+	// }
 
 	existingAttr.Name = updatedAttr.Name
 	existingAttr.Context = updatedAttr.Context
@@ -377,6 +377,7 @@ func (ctrl *AttrController) UpdateChatAttr(c *gin.Context) {
 	existingAttr.Type = chatAttr.Type
 	existingAttr.Ord = chatAttr.Ord
 	existingAttr.Tips = chatAttr.Tips
+	// existingApp.sd
 
 	// Save app data to database
 	if err := db.Save(existingAttr); err != nil {
