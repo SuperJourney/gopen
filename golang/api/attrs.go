@@ -318,8 +318,9 @@ func (ctrl *AttrController) UpdateAttr(c *gin.Context) {
 	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "chat类型属性 请使用  UpdateChatAttr"})
 	// 	return
 	// }
-
-	existingAttr.Name = updatedAttr.Name
+	if updatedAttr.Name != "" {
+		existingAttr.Name = updatedAttr.Name
+	}
 	existingAttr.Context = updatedAttr.Context
 	existingAttr.Ord = updatedAttr.Ord
 	existingAttr.Tips = updatedAttr.Tips
