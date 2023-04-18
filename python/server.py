@@ -38,7 +38,7 @@ def txt2img():
                           width=width,
                           height=height,
                           )
-
+    
     image_stream = io.BytesIO()
     result1.image.save(image_stream, format='JPEG')
     image_stream.seek(0)

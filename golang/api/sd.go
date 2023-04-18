@@ -413,6 +413,12 @@ func zh2en(usermessage string, prompt string, attrModel *model.Attr, c *gin.Cont
 					return "", err
 				}
 			}
+
+			chatprompt, err := utils.Translate(chatprompt, "zh", "en")
+			if err != nil {
+				return "", err
+			}
+
 			prompt = prompt + chatprompt
 		}
 	}
