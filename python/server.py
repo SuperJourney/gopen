@@ -5,7 +5,7 @@ import webuiapi
 from PIL import Image, ImageDraw
 
 
-api = webuiapi.WebUIApi(host='10.11.40.31', port=7860)
+
 
 
 app = Flask(__name__)
@@ -18,6 +18,7 @@ def serve_image(path):
 
 @app.route('/txt2img', methods=['POST'])
 def txt2img():
+    api = webuiapi.WebUIApi(host='10.11.40.31', port=7860)
     width = request.form.get('width', 512)
     height = request.form.get('height', 512)
 
@@ -49,6 +50,7 @@ def txt2img():
 
 @app.route('/img2img', methods=['POST'])
 def img2img():
+    api = webuiapi.WebUIApi(host='10.11.40.31', port=7860)
     width = request.form.get('width', 512)
     height = request.form.get('height', 512)
 
