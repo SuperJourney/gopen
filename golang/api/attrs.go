@@ -320,6 +320,8 @@ func (ctrl *AttrController) UpdateAttr(c *gin.Context) {
 
 	existingAttr.Name = updatedAttr.Name
 	existingAttr.Context = updatedAttr.Context
+	existingAttr.Ord = updatedAttr.Ord
+	existingAttr.Tips = updatedAttr.Tips
 
 	db.Save(existingAttr)
 
@@ -373,6 +375,8 @@ func (ctrl *AttrController) UpdateChatAttr(c *gin.Context) {
 	existingAttr.Name = chatAttr.Name
 	existingAttr.Context = string(context)
 	existingAttr.Type = chatAttr.Type
+	existingAttr.Ord = chatAttr.Ord
+	existingAttr.Tips = chatAttr.Tips
 
 	// Save app data to database
 	if err := db.Save(existingAttr); err != nil {

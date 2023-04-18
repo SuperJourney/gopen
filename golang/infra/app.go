@@ -1,6 +1,8 @@
 package infra
 
 import (
+	"context"
+
 	"github.com/gin-gonic/gin"
 	"github.com/sashabaranov/go-openai"
 )
@@ -15,29 +17,12 @@ func GetApiEngineV2() *gin.RouterGroup {
 	return Engine.Group("api/v2")
 }
 
-// func ss() {
-// 	stream, err := GetClient().CreateChatCompletionStream(context.Background(), openai.ChatCompletionRequest{})
-// 	if err != nil {
-// 		fmt.Printf("CompletionStream error: %v\n", err)
-// 		return
-// 	}
-// 	defer stream.Close()
-
-// 	for {
-// 		response, err := stream.Recv()
-// 		if errors.Is(err, io.EOF) {
-// 			fmt.Println("Stream finished")
-// 			return
-// 		}
-
-// 		if err != nil {
-// 			fmt.Printf("Stream error: %v\n", err)
-// 			return
-// 		}
-
-// 		fmt.Printf("Stream response: %v\n", response)
-// 	}
-// }
+type ChatClient interface {
+	CreateChatCompletion(
+		ctx context.Context,
+		request openai.ChatCompletionRequest,
+	) (response openai.ChatCompletionResponse, err error)
+}
 
 func GetClient() *openai.Client {
 

@@ -205,6 +205,7 @@ func (ctrl *AppController) UpdateApp(c *gin.Context) {
 	// Update the existing app with the updated app data
 	existingApp.Name = updatedApp.Name
 	// Update other fields as needed
+	existingApp.Ord = updatedApp.Ord
 
 	// Save the updated app to the database
 	appDB.Create(existingApp)
