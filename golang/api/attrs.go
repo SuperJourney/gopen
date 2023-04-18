@@ -377,7 +377,7 @@ func (ctrl *AttrController) UpdateChatAttr(c *gin.Context) {
 	existingAttr.Type = chatAttr.Type
 	existingAttr.Ord = chatAttr.Ord
 	existingAttr.Tips = chatAttr.Tips
-	// existingApp.sd
+	existingAttr.SDParam = chatAttr.SDParam
 
 	// Save app data to database
 	if err := db.Save(existingAttr); err != nil {

@@ -402,7 +402,7 @@ func zh2en(usermessage string, prompt string, attrModel *model.Attr, c *gin.Cont
 					return "", err
 				}
 			case TYPE_EDITS:
-				chatprompt, err = GptEdits(usermessage, attrModel.Context)
+				chatprompt, err = infra.GetClient().GptEdits(usermessage, attrModel.Context)
 				if err != nil {
 					return "", err
 				}

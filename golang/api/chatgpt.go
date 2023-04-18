@@ -83,7 +83,7 @@ func Edits(attrModel *model.Attr, c *gin.Context, msg string) {
 	// 创建 HTTP 请求
 	// 设置请求头
 	// 发送请求
-	context, err := GptEdits(msg, attrModel.Context)
+	context, err := infra.GetClient().GptEdits(msg, attrModel.Context)
 	if err != nil {
 		common.Error(c, http.StatusInternalServerError, err)
 	}
