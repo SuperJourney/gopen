@@ -9,6 +9,7 @@ import (
 	"github.com/SuperJourney/gopen/infra"
 	"github.com/SuperJourney/gopen/repo/model"
 	"github.com/SuperJourney/gopen/repo/query"
+	"github.com/SuperJourney/gopen/vars"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -32,7 +33,7 @@ type AppController struct {
 
 func NewAppController() *AppController {
 	return &AppController{
-		Query: query.Use(infra.DB),
+		Query: query.Use(vars.DB),
 	}
 }
 

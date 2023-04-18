@@ -7,6 +7,7 @@ import (
 	"github.com/SuperJourney/gopen/config"
 	_ "github.com/SuperJourney/gopen/docs"
 	"github.com/SuperJourney/gopen/infra"
+	"github.com/SuperJourney/gopen/vars"
 	"github.com/fsnotify/fsnotify"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
@@ -32,7 +33,7 @@ func main() {
 	// unsafe ; for debug
 	infra.Engine.GET("/config", func(ctx *gin.Context) {
 		// ret, _ := json.Marshal(config.LoadConfig())
-		ctx.JSON(200, infra.Setting)
+		ctx.JSON(200, vars.Setting)
 	})
 
 	// config 热加载
@@ -61,7 +62,7 @@ func configWatch() *fsnotify.Watcher {
 				}
 				if event.Op&fsnotify.Write == fsnotify.Write {
 					fmt.Println("Config file modified. Reloading...")
-					infra.Setting = config.LoadConfig()
+					vars.Setting = config.LoadConfig()
 				}
 			case err, ok := <-watcher.Errors:
 				if !ok {

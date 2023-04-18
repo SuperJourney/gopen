@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -10,6 +9,7 @@ import (
 	"github.com/SuperJourney/gopen/infra"
 	"github.com/SuperJourney/gopen/repo/model"
 	"github.com/SuperJourney/gopen/repo/query"
+	"github.com/SuperJourney/gopen/vars"
 	"github.com/gin-gonic/gin"
 	"github.com/sashabaranov/go-openai"
 	"gorm.io/gorm"
@@ -22,7 +22,7 @@ type ChatGptController struct {
 
 func NewChatGptController() *ChatGptController {
 	return &ChatGptController{
-		Query: query.Use(infra.DB),
+		Query: query.Use(vars.DB),
 	}
 }
 
@@ -65,8 +65,8 @@ func (ctrl *ChatGptController) Request(c *gin.Context) {
 		Edits(attrModel, c, userMessage.Content)
 	default:
 		// 创建文本生成请求
-		// MaxTokens: int(infra.Setting.ChatGPT.MaxTokens),
-		// Temperature: infra.Setting.ChatGPT.Temperature,
+		// MaxTokens: int(vars.Setting.ChatGPT.MaxTokens),
+		// Temperature: vars.Setting.ChatGPT.Temperature,
 		// 调用OpenAI生成文本
 		// 将生成的文本以JSON格式返回
 		res, err := ChatCompletion(attrModel.Context, userMessage.Content)
@@ -83,7 +83,7 @@ func Edits(attrModel *model.Attr, c *gin.Context, msg string) {
 	// 创建 HTTP 请求
 	// 设置请求头
 	// 发送请求
-	context, err := infra.GetClient().GptEdits(msg, attrModel.Context)
+	context, err := vars.ChatClient.GptEdits(msg, attrModel.Context)
 	if err != nil {
 		common.Error(c, http.StatusInternalServerError, err)
 	}
@@ -108,11 +108,11 @@ func ChatCompletion(preConversion string, msg string) (string, error) {
 		Messages: messages,
 	}
 
-	resp, err := infra.GetClient().CreateChatCompletion(context.Background(), req)
+	resp, err := vars.ChatClient.ChatCompletion(req)
 	if err != nil {
 		return "", err
 	}
-	return resp.Choices[0].Message.Content, nil
+	return resp, nil
 }
 
 func init() {

@@ -16,6 +16,7 @@ import (
 	"github.com/SuperJourney/gopen/repo/model"
 	"github.com/SuperJourney/gopen/repo/query"
 	"github.com/SuperJourney/gopen/utils"
+	"github.com/SuperJourney/gopen/vars"
 	"github.com/gin-gonic/gin"
 	"github.com/sashabaranov/go-openai"
 )
@@ -28,7 +29,7 @@ type SDController struct {
 
 func NewSDController() *SDController {
 	return &SDController{
-		Query: query.Use(infra.DB),
+		Query: query.Use(vars.DB),
 	}
 }
 
@@ -122,7 +123,7 @@ func (*SDController) toImageUrl(c *gin.Context, imageData []byte) bool {
 
 	fileWriter.Close()
 
-	url := infra.Setting.ImgUploadUrl
+	url := vars.Setting.ImgUploadUrl
 
 	req, err := http.NewRequest("POST", url, fileBuf)
 	if err != nil {
@@ -232,7 +233,7 @@ func (ctrl *SDController) textToImg(c *gin.Context) ([]byte, error) {
 }
 
 var ImgUrl = func() string {
-	return fmt.Sprintf("http://%s/", infra.Setting.SDHOST)
+	return fmt.Sprintf("http://%s/", vars.Setting.SDHOST)
 }
 
 // ImgToImg 函数处理将一张图片文件上传并转换成另一张图片的请求。
@@ -386,7 +387,7 @@ func (ctrl *SDController) imgToImg(c *gin.Context) ([]byte, error) {
 
 func zh2en(usermessage string, prompt string, attrModel *model.Attr, c *gin.Context) (string, error) {
 	var err error
-	if infra.Setting.BaiduTransate {
+	if vars.Setting.BaiduTransate {
 		chatprompt, err := utils.Translate(usermessage, "zh", "en")
 		if err != nil {
 			return "", err
@@ -402,7 +403,7 @@ func zh2en(usermessage string, prompt string, attrModel *model.Attr, c *gin.Cont
 					return "", err
 				}
 			case TYPE_EDITS:
-				chatprompt, err = infra.GetClient().GptEdits(usermessage, attrModel.Context)
+				chatprompt, err = vars.ChatClient.GptEdits(usermessage, attrModel.Context)
 				if err != nil {
 					return "", err
 				}

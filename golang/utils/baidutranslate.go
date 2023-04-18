@@ -10,15 +10,15 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/SuperJourney/gopen/infra"
+	"github.com/SuperJourney/gopen/vars"
 )
 
 var translateURL = "http://api.fanyi.baidu.com/api/trans/vip/translate"
 
 // Translate 调用百度翻译 API 进行文本翻译
 func Translate(message string, fromLang, toLang string) (string, error) {
-	var appID = infra.Setting.BaiduAppId // 替换为您的 appid
-	var apiKey = infra.Setting.BaiduApiKey
+	var appID = vars.Setting.BaiduAppId // 替换为您的 appid
+	var apiKey = vars.Setting.BaiduApiKey
 	// 生成随机 salt
 	salt := strconv.FormatInt(time.Now().Unix(), 10)
 
