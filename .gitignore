@@ -4,3 +4,5 @@ __debug_bin
 python/images/1
 golang/test/main.go
 golang/config.toml
+golang/docs/*
+!golang/docs/README.md

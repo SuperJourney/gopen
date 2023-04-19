@@ -321,11 +321,21 @@ func (ctrl *AttrController) UpdateAttr(c *gin.Context) {
 	if updatedAttr.Name != "" {
 		existingAttr.Name = updatedAttr.Name
 	}
-	existingAttr.Context = updatedAttr.Context
-	existingAttr.Ord = updatedAttr.Ord
-	existingAttr.Tips = updatedAttr.Tips
-	existingAttr.Type = updatedAttr.Type
-	existingAttr.SDParam = updatedAttr.SDParam
+	if updatedAttr.Context != "" {
+		existingAttr.Context = updatedAttr.Context
+	}
+	if updatedAttr.Type != 0 {
+		existingAttr.Type = updatedAttr.Type
+	}
+	if updatedAttr.Ord != 0 {
+		existingAttr.Ord = updatedAttr.Ord
+	}
+	if updatedAttr.Tips != "" {
+		existingAttr.Tips = updatedAttr.Tips
+	}
+	if updatedAttr.SDParam != "" {
+		existingAttr.SDParam = updatedAttr.SDParam
+	}
 
 	db.Save(existingAttr)
 
@@ -376,12 +386,24 @@ func (ctrl *AttrController) UpdateChatAttr(c *gin.Context) {
 		return
 	}
 
-	existingAttr.Name = chatAttr.Name
-	existingAttr.Context = string(context)
-	existingAttr.Type = chatAttr.Type
-	existingAttr.Ord = chatAttr.Ord
-	existingAttr.Tips = chatAttr.Tips
-	existingAttr.SDParam = chatAttr.SDParam
+	if chatAttr.Name != "" {
+		existingAttr.Name = chatAttr.Name
+	}
+	if string(context) != "" {
+		existingAttr.Context = string(context)
+	}
+	if chatAttr.Type != 0 {
+		existingAttr.Type = chatAttr.Type
+	}
+	if chatAttr.Ord != 0 {
+		existingAttr.Ord = chatAttr.Ord
+	}
+	if chatAttr.Tips != "" {
+		existingAttr.Tips = chatAttr.Tips
+	}
+	if chatAttr.SDParam != "" {
+		existingAttr.SDParam = chatAttr.SDParam
+	}
 
 	// Save app data to database
 	if err := db.Save(existingAttr); err != nil {
