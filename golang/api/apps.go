@@ -209,7 +209,7 @@ func (ctrl *AppController) UpdateApp(c *gin.Context) {
 	existingApp.Ord = updatedApp.Ord
 
 	// Save the updated app to the database
-	appDB.Create(existingApp)
+	appDB.Save(existingApp)
 
 	// Return success response
 	c.JSON(http.StatusOK, gin.H{
