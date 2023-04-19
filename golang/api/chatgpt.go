@@ -1,8 +1,11 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/SuperJourney/gopen/common"
@@ -115,8 +118,94 @@ func ChatCompletion(preConversion string, msg string) (string, error) {
 	return resp, nil
 }
 
+func ChatCompletionSteam(preConversion string, msg string) (stream *openai.ChatCompletionStream, err error) {
+	var messages []openai.ChatCompletionMessage
+	if err := json.Unmarshal([]byte(preConversion), &messages); err != nil {
+		return nil, err
+	}
+
+	messages = append(messages, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleUser,
+		Content: msg,
+	})
+
+	req := openai.ChatCompletionRequest{
+		Model:    openai.GPT3Dot5Turbo,
+		Messages: messages,
+	}
+
+	resp, err := vars.ChatClient.CreateChatCompletionStream(context.Background(), req)
+	return resp, err
+}
+
+func (ctrl *ChatGptController) SteamRequest(c *gin.Context) {
+	attrID, ok := GetAttrID(c)
+	if !ok {
+		return
+	}
+
+	var userMessage openai.ChatCompletionMessage
+	if err := c.BindJSON(&userMessage); err != nil {
+		common.Error(c, http.StatusBadRequest, err)
+		return
+	}
+
+	// 根据attrID 获取context
+	db := ctrl.Query.Attr
+	attrModel, err := db.Where(db.ID.Eq(uint(attrID))).First()
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			common.Error(c, http.StatusBadRequest, errors.New("没有找到符合条件的attr"))
+			return
+		}
+	}
+
+	switch attrModel.ContextType {
+	case int32(TYPE_EDITS):
+		common.Error(c, http.StatusBadRequest, errors.New("暂时不支持gpt, edits模式"))
+		return
+	default:
+		// 创建文本生成请求
+		// MaxTokens: int(vars.Setting.ChatGPT.MaxTokens),
+		// Temperature: vars.Setting.ChatGPT.Temperature,
+		// 调用OpenAI生成文本
+		// 将生成的文本以JSON格式返回
+		stream, err := ChatCompletionSteam(attrModel.Context, userMessage.Content)
+		if err != nil {
+			fmt.Printf("CompletionStream error: %v\n", err)
+			return
+		}
+		defer stream.Close()
+
+		// 设置响应头，指示响应是流式输出的
+		c.Header("Content-Type", "text/event-stream")
+		c.Header("Cache-Control", "no-cache")
+		c.Header("Connection", "keep-alive")
+
+		for {
+			response, err := stream.Recv()
+			if errors.Is(err, io.EOF) {
+				common.Info("Stream finished")
+				return
+			}
+			bytes, err := json.Marshal(response)
+			if err != nil {
+				common.Info("Stream error: %v\n", err)
+				return
+			}
+			common.Info(string(bytes))
+			for _, v := range response.Choices {
+				c.Writer.WriteString(v.Delta.Content)
+			}
+			c.Writer.Flush()
+		}
+	}
+}
+
 func init() {
 	router := infra.GetApiEngine()
 	chatCtrl := NewChatGptController()
 	router.POST("/gpt/:attr_id/chat-completion", chatCtrl.Request)
+
+	router.POST("/gpt/:attr_id/chat-completion/steam", chatCtrl.SteamRequest)
 }

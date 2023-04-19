@@ -171,7 +171,6 @@ func (*SDController) toImageUrl(c *gin.Context, imageData []byte) bool {
 }
 
 func (ctrl *SDController) textToImg(c *gin.Context) ([]byte, error) {
-
 	var x TextToImgMessage
 	if err := c.BindJSON(&x); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -205,7 +204,8 @@ func (ctrl *SDController) textToImg(c *gin.Context) ([]byte, error) {
 		}
 	}
 
-	x.Prompt = prompt
+	x.SDParam.Prompt = x.SDParam.Prompt + prompt
+	x.SDParam.NegativePrompt = x.NegativePrompt
 
 	var resp *http.Response
 	resp, err = Request_Text2Img(x.SDParam)
@@ -458,7 +458,7 @@ const ParamHeight = "height"
 
 // 需要手动关闭连接
 func Request_Text2Img(param SDParam) (*http.Response, error) {
-
+	common.Info("text2img param: %v", param)
 	// 创建一个 buffer 用于构建请求体
 	body := new(bytes.Buffer)
 	writer := multipart.NewWriter(body)

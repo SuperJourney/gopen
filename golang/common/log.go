@@ -4,6 +4,8 @@ import (
 	"fmt"
 )
 
-func Info(format string, a ...any) {
-	fmt.Printf(format, a...)
+func Info(format string, a ...interface{}) {
+	fmt.Println("log begin----")
+	fmt.Printf("\x1b[31m"+format+"\x1b[0m\n", a...)
+	fmt.Println("-----end----")
 }

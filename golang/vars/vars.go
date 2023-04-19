@@ -1,6 +1,8 @@
 package vars
 
 import (
+	"context"
+
 	"github.com/SuperJourney/gopen/config"
 	"github.com/sashabaranov/go-openai"
 	"gorm.io/driver/sqlite"
@@ -10,6 +12,10 @@ import (
 type ChatClientIFace interface {
 	ChatCompletion(request openai.ChatCompletionRequest) (string, error)
 	GptEdits(msg string, instruction string) (string, error)
+	CreateChatCompletionStream(
+		ctx context.Context,
+		request openai.ChatCompletionRequest,
+	) (stream *openai.ChatCompletionStream, err error)
 }
 
 var ChatClient ChatClientIFace

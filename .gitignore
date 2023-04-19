@@ -6,3 +6,4 @@ golang/test/main.go
 golang/config.toml
 golang/docs/*
 !golang/docs/README.md
+node_modules/
