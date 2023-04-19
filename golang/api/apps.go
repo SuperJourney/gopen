@@ -165,7 +165,7 @@ func (ctrl *AppController) CreateApp(c *gin.Context) {
 // @Tags App
 // @Accept json
 // @Produce json
-// @Param app_id path string true "应用ID"
+// @Param id path int true "App ID"
 // @Param appData body App true "更新的应用数据"
 // @Success 200 {object} App
 // @Failure 400 {object} common.ErrorResponse

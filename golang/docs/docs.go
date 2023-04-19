@@ -591,9 +591,9 @@ const docTemplate = `{
                 "summary": "更新应用",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "应用ID",
-                        "name": "app_id",
+                        "type": "integer",
+                        "description": "App ID",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     },
@@ -940,7 +940,8 @@ const docTemplate = `{
                     "example": "商城商品"
                 },
                 "ord": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -1023,6 +1024,10 @@ const docTemplate = `{
                 },
                 "ord": {
                     "type": "integer"
+                },
+                "sd_param": {
+                    "type": "string",
+                    "example": "{\"width\":512,\"height\":512}"
                 },
                 "tips": {
                     "type": "string",

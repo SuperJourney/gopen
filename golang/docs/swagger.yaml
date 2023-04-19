@@ -6,6 +6,7 @@ definitions:
         example: 商城商品
         type: string
       ord:
+        example: 1
         type: integer
     type: object
   api.App_S:
@@ -66,6 +67,9 @@ definitions:
         type: string
       ord:
         type: integer
+      sd_param:
+        example: '{"width":512,"height":512}'
+        type: string
       tips:
         example: 为了获得更优的反馈，请描述商品名称与商品特性，如'YSL/圣罗兰 416； 红黑管唇釉，易上色，湿润'
         type: string
@@ -498,11 +502,11 @@ paths:
       - application/json
       description: 根据提供的应用ID和更新的应用数据更新应用信息
       parameters:
-      - description: 应用ID
+      - description: App ID
         in: path
-        name: app_id
+        name: id
         required: true
-        type: string
+        type: integer
       - description: 更新的应用数据
         in: body
         name: appData

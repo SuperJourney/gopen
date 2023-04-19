@@ -11,7 +11,6 @@ import (
 type App struct {
 	Name  string `json:"name,omitempty"`
 	Attrs []Attr `json:"attrs,omitempty"`
-	Tips  string `json:"tips"`
 	Ord   int    `json:"ord,omitempty"`
 	gorm.Model
 }
