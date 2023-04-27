@@ -17,7 +17,7 @@ import (
 // @title OPENAI
 // @version 1.0
 // @description This is a API documentation for OPENAI.
-// @host 192.168.3.246:7211
+// @host 192.168.3.246:7211 // 家用ip地址，如果希望远程访问需要改一下
 // @host localhost:8080
 // @BasePath /api
 func main() {

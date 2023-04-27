@@ -206,6 +206,5 @@ func init() {
 	router := infra.GetApiEngine()
 	chatCtrl := NewChatGptController()
 	router.POST("/gpt/:attr_id/chat-completion", chatCtrl.Request)
-
-	router.POST("/gpt/:attr_id/chat-completion/steam", chatCtrl.SteamRequest)
+	router.POST("/gpt/:attr_id/chat-completion/stream", chatCtrl.SteamRequest)
 }

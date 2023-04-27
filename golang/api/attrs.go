@@ -503,7 +503,6 @@ func init() {
 	router.GET("/apps/:app_id/attrs/:attr_id", attCtrl.GetAttr)
 	router.POST("/apps/:app_id/attrs", attCtrl.CreateAttr)
 	router.POST("/apps/:app_id/chat_attrs", attCtrl.CreateChatAttr)
-	// router.POST("/apps/:app_id/img_attrs", attCtrl.CreateChatImagAttr)
 	router.PUT("/apps/:app_id/attrs/:attr_id", attCtrl.UpdateAttr)
 	router.PUT("/apps/:app_id/chat_attrs/:attr_id", attCtrl.UpdateChatAttr)
 	router.DELETE("/apps/:app_id/attrs/:attr_id", attCtrl.DeleteAttr)
