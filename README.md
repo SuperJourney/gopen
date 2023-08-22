@@ -1,6 +1,6 @@
 # GOPEN
 
-公司 AI CPT 大赛 后端代码
+AICPT 大赛 后端代码 (开源)
 
 ```bash
 docker-compose up -d
